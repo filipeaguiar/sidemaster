@@ -1,141 +1,210 @@
 <template>
   <div class="container mx-auto p-4 relative">
-    <div v-if="isLoading" class="text-center text-gray-500 my-8">
-      Carregando informações do guia...
-    </div>
-    <div v-else-if="error" class="text-center text-red-600 font-bold my-8">
-      Erro ao carregar guia: {{ error }}
-    </div>
-    <div v-else-if="guide">
-      <div class="bg-white shadow-md rounded-lg p-6 mb-6 relative">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Guia de Sideboard: {{ guide.deck_archetype }}</h1>
-        <p class="text-gray-700 mb-2"><strong>Jogador:</strong> {{ guide.player }}</p>
-        <p class="text-gray-700 mb-2"><strong>Formato:</strong> {{ guide.formato }}</p>
-        <p class="text-gray-700 mb-4"><strong>Versão:</strong> {{ guide.versão }} (Lançado em: {{ guide.release_date }})
-        </p>
-
-        <div class="mb-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-3">Maindeck</h2>
-          <ul role="list" class="list-disc pl-5 text-gray-700">
-            <li v-for="card in guide.maindeck" :key="card.card">
-              <span class="card-name hover:underline cursor-pointer" @mouseover="handleCardMouseOver(card.card, $event)"
-                @mouseout="handleCardMouseOut">{{ card.card }}</span> - {{ card.quantidade }}
-            </li>
-          </ul>
-        </div>
-
-        <div class="mb-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-3">Sideboard</h2>
-          <ul role="list" class="list-disc pl-5 text-gray-700">
-            <li v-for="card in guide.sideboard" :key="card.card">
-              <span class="card-name hover:underline cursor-pointer" @mouseover="handleCardMouseOver(card.card, $event)"
-                @mouseout="handleCardMouseOut">{{ card.card }}</span> - {{ card.quantidade }}
-            </li>
-          </ul>
-        </div>
-
-        <div v-if="guide.estrategias && guide.estrategias.length > 0">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Estratégias de Sideboard</h2>
-          <div v-for="(estrategia, index) in guide.estrategias" :key="index"
-            class="mb-6 p-4 border border-gray-200 rounded-md">
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Contra: {{ estrategia.deck_oponente }}</h3>
-            <p class="text-gray-700 mb-3"><strong>Estratégia Geral:</strong> {{ estrategia.estrategia_geral }}</p>
-
-            <div class="mb-3">
-              <h4 class="text-md font-semibold text-gray-800 mb-1">Side In</h4>
-              <ul role="list" class="list-disc pl-5 text-gray-700">
-                <li v-for="card in estrategia.side_in" :key="card.card">
-                  <span class="card-name hover:underline cursor-pointer"
-                    @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
-                    }}</span> x{{ card.quantidade }} - <span class="italic">{{ card.motivo }}</span>
-                </li>
-              </ul>
-            </div>
-
+    <UContainer v-if="isLoading" class="text-center text-gray-500 my-8">
+      <p class="mt-2">Carregando informações do guia...</p>
+    </UContainer>
+    <UContainer v-else-if="error" class="text-center text-red-600 font-bold my-8">
+      <UAlert type="error" title="Erro ao carregar guia" :body="error" />
+    </UContainer>
+    <UContainer v-else-if="guide">
+      <UCard class="mb-8">
+        <template #header>
+          <div class="flex items-center justify-between">
             <div>
-              <h4 class="text-md font-semibold text-gray-800 mb-1">Side Out</h4>
-              <ul role="list" class="list-disc pl-5 text-gray-700">
-                <li v-for="card in estrategia.side_out" :key="card.card">
-                  <span class="card-name hover:underline cursor-pointer"
-                    @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
-                    }}</span> x{{ card.quantidade }} - <span class="italic">{{ card.motivo }}</span>
-                </li>
-              </ul>
+              <h1 class="text-3xl font-bold text-gray-900">Guia de Sideboard</h1>
+              <h2 class="text-xl text-gray-700 mt-1">para <span class="font-semibold text-blue-600">{{
+                guide.deck_archetype }}</span></h2>
             </div>
+            <UBadge color="blue" variant="subtle">Versão {{ guide.versão }}</UBadge>
           </div>
+          <div class="mt-4 flex space-x-4 text-gray-600">
+            <div><span class="font-medium">Jogador:</span> {{ guide.player }}</div>
+            <div><span class="font-medium">Formato:</span> {{ guide.formato }}</div>
+            <div><span class="font-medium">Lançamento:</span> {{ guide.release_date }}</div>
+          </div>
+        </template>
+
+        <div class="flex space-x-8 mb-8">
+          <section class="w-1/2">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Maindeck</h3>
+            <ul role="list" class="list-disc pl-5 text-gray-700">
+              <li v-for="card in guide.maindeck" :key="card.card" class="mb-1">
+                <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
+                  @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
+                  }}</span>
+                <span class="text-gray-500">x{{ card.quantidade }}</span>
+              </li>
+            </ul>
+          </section>
+
+          <section class="w-1/2">
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Sideboard</h3>
+            <ul role="list" class="list-disc pl-5 text-gray-700">
+              <li v-for="card in guide.sideboard" :key="card.card" class="mb-1">
+                <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
+                  @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
+                  }}</span>
+                <span class="text-gray-500">x{{ card.quantidade }}</span>
+              </li>
+            </ul>
+          </section>
         </div>
 
-        <div v-if="guide.nota" class="mt-8 pt-4 border-t border-gray-300 text-gray-600 italic">
-          <p><strong>Nota:</strong> {{ guide.nota }}</p>
-        </div>
+        <section v-if="guide.descricao" class="mb-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-3">Descrição do Deck</h3>
+          <UCard class="mb-8 bg-gray-50 rounded-md p-4 text-gray-700 leading-loose">
+            <template #body>
+              <div v-html="formatTextWithCardLinks(guide.descricao)"></div>
+            </template>
+          </UCard>
+        </section>
 
-        <CardImagePopup :cardName="popupCardName" :visible="isPopupVisible" :position="popupPosition"
-          :cardImageCache="cardImageCache" />
-      </div>
-      <div v-if="!isLoading && !error && guide">
-        <h2 class="text-xl font-semibold text-gray-800 mt-8 mb-4">Card Image Cache (Debug)</h2>
-        <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(cardImageCache, null, 2) }}
-        </pre>
-      </div>
-    </div>
-    <div v-else class="text-center text-gray-500 my-8">
+        <section v-if="guide.estrategias && guide.estrategias.length > 0" class="mb-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">Estratégias de Sideboard</h3>
+          <div v-for="(estrategia, index) in guide.estrategias" :key="index" class="mb-4">
+            <UCard>
+              <template #header>
+                <h4 class="text-lg font-semibold text-gray-900">Contra: <span class="font-medium text-indigo-600">{{
+                  estrategia.deck_oponente }}</span></h4>
+              </template>
+              <div class="p-4">
+                <p class="text-gray-700 mb-3"><strong class="font-medium">Estratégia Geral:</strong>
+                <div v-html="formatTextWithCardLinks(estrategia.estrategia_geral)" inline></div>
+                </p>
+
+                <div class="mb-2">
+                  <h5 class="text-md font-semibold text-gray-800 mb-1">Side In</h5>
+                  <ul role="list" class="list-disc pl-5 text-gray-700 text-sm">
+                    <li v-for="(card, cardIndex) in estrategia.side_in" :key="card.card" class="mb-0.5">
+                      <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
+                        @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
+                        }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
+                        class="italic text-gray-600">
+                        <div v-html="formatTextWithCardLinks(card.motivo)" inline></div>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h5 class="text-md font-semibold text-gray-800 mb-1">Side Out</h5>
+                  <ul role="list" class="list-disc pl-5 text-gray-700 text-sm">
+                    <li v-for="(card, cardIndex) in estrategia.side_out" :key="card.card" class="mb-0.5">
+                      <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
+                        @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
+                        }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
+                        class="italic text-gray-600">
+                        <div v-html="formatTextWithCardLinks(card.motivo)" inline></div>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </UCard>
+          </div>
+        </section>
+
+      </UCard>
+      <UCard v-if="!isLoading && !error && guide" class="mt-12">
+        <template #header>
+          <h2 class="text-xl font-semibold text-gray-800">Card Image Cache (Debug)</h2>
+        </template>
+        <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto text-sm border border-gray-200"> {{
+          JSON.stringify(cardImageCache, null, 2) }}</pre>
+      </UCard>
+      <CardImagePopup :cardName="popupCardName" :visible="isPopupVisible" :position="popupPosition"
+        :cardImageCache="cardImageCache" />
+    </UContainer>
+    <UContainer v-else class="text-center text-gray-500 my-8">
       Guia não encontrado.
-    </div>
+    </UContainer>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { Decklist } from '@/types/decklists'
-import CardImagePopup from '@/components/CardImagePopup.vue';
+import type { Decklist } from '@/types/guide/decklist';
+import CardImagePopup from '~/components/CardImagePopup.vue';
+
+useHead({
+  title: 'Guia de Sideboard',
+  meta: [
+    { name: 'description', content: 'Guia de sideboard para Magic: The Gathering' },
+  ],
+});
 
 const route = useRoute();
 const guideId = route.params.id as string;
 const guide = ref<Decklist | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-const cardImageCache = ref<{ [cardName: string]: string }>({}); // Objeto para cache das URLs das imagens
+const cardImageCache = ref<{ [cardName: string]: string }>({});
 
-// Estado para o componente CardImagePopup
 const popupCardName = ref('');
 const isPopupVisible = ref(false);
 const popupPosition = ref({ top: '0px', left: '0px' });
+const currentCardElement = ref<HTMLElement | null>(null);
+const mouseMoveHandler = ref<((event: MouseEvent) => void) | null>(null);
+
+const updatePopupPosition = (event: MouseEvent) => {
+  if (currentCardElement.value && isPopupVisible.value) {
+    popupPosition.value = {
+      top: `${event.clientY + 15}px`,
+      left: `${event.clientX + 15}px`,
+    };
+  }
+};
 
 const handleCardMouseOver = (cardName: string, event: MouseEvent) => {
   popupCardName.value = cardName;
   isPopupVisible.value = true;
+  currentCardElement.value = event.target as HTMLElement;
 
-  const targetElement = event.target as HTMLElement; // Elemento que disparou o evento (o <span> do nome da carta)
-  if (targetElement) {
-    const rect = targetElement.getBoundingClientRect();
-    popupPosition.value = {
-      top: `${rect.bottom + window.scrollY + 5}px`, // Posiciona abaixo do elemento, considerando scroll da página
-      left: `${rect.left + window.scrollX + 150}px`,   // Posiciona à direita do elemento, considerando scroll da página
+  popupPosition.value = {
+    top: `${event.clientY - 10}px`,
+    left: `${event.clientX + 20}px`,
+  };
+
+  if (!mouseMoveHandler.value) {
+    mouseMoveHandler.value = (event: MouseEvent) => {
+      updatePopupPosition(event);
     };
-  } else {
-    // Fallback caso o elemento não seja encontrado (improvável, mas para segurança)
-    popupPosition.value = {
-      top: `${event.clientY + 10}px`,
-      left: `${event.clientX + 10}px`,
-    };
+    document.addEventListener('mousemove', mouseMoveHandler.value);
   }
 };
 
 const handleCardMouseOut = () => {
   isPopupVisible.value = false;
+  currentCardElement.value = null;
+  if (mouseMoveHandler.value) {
+    document.removeEventListener('mousemove', mouseMoveHandler.value);
+    mouseMoveHandler.value = null;
+  }
 };
+
+
+const formatTextWithCardLinks = (text: string) => {
+  if (!text) return '';
+
+  const cardNameRegex = /\[\[([^\]]+?)\]\]/g;
+  return text.replace(cardNameRegex, (match, cardName) => {
+    return `<span class="card-name font-bold hover:text-blue-600 hover:underline cursor-pointer" @mouseover="handleCardMouseOver('${cardName}', $event)" @mouseout="handleCardMouseOut">${cardName}</span>`;
+  });
+};
+
 
 onMounted(async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const response = await $fetch<Decklist>(`/api/guide/${guideId}`);
+    const response = await $fetch<Decklist>(`/api/guide/${guideId}`,
+      { cache: 'no-cache' });
     guide.value = response;
 
     if (guide.value) {
-      // Iniciar a busca das imagens em background APÓS o guia ser carregado
-      await fetchCardImagesInBackground(guide.value); // Aguarda a busca de imagens para o cache estar pronto inicialmente
+      await fetchCardImagesInBackground(guide.value);
     }
+
 
   } catch (e: any) {
     error.value = e.message || 'Erro desconhecido ao carregar o guia.';
@@ -149,7 +218,6 @@ onMounted(async () => {
 const fetchCardImagesInBackground = async (decklist: Decklist) => {
   const allCardNames = new Set<string>();
 
-  // Coletar nomes de cartas do maindeck, sideboard e estrategias
   decklist.maindeck.forEach(cardEntry => allCardNames.add(cardEntry.card));
   decklist.sideboard.forEach(cardEntry => allCardNames.add(cardEntry.card));
   decklist.estrategias?.forEach(estrategia => {
@@ -157,8 +225,7 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
     estrategia.side_out.forEach(cardEntry => allCardNames.add(cardEntry.card));
   });
 
-  // Buscar imagens e preencher o cache
-  const cache: { [cardName: string]: string } = {}; // Cache local
+  const cache: { [cardName: string]: string } = {};
   for (const cardName of allCardNames) {
     try {
       const cardResponse: any = await $fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(cardName)}`);
@@ -168,14 +235,11 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
       cache[cardName] = '';
     }
   }
-  cardImageCache.value = cache; // Atualiza o ref cardImageCache
+  cardImageCache.value = cache;
 };
-
 
 </script>
 
 <style scoped>
-.card-name {
-  @apply hover:underline cursor-pointer;
-}
+/* Estilos scoped removidos */
 </style>

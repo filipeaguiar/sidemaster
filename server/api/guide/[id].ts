@@ -9,11 +9,11 @@ export default defineEventHandler(async (event): Promise<Decklist> => {
     case '1': // Mockup para guide ID 1 (Affinity Pauper - JSON Detalhado)
       return {
         "id": 1,
-        "player": "Jogador Desconhecido",
+        "player": "LuffyDoChapeuDePalha",
         "versão": "1.0",
         "release_date": "2024-07-27",
         "formato": "Pauper",
-        "deck_archetype": "Affinity (Exemplo Detalhado)",
+        "deck_archetype": "Affinity",
         "maindeck": [
           { "card": "Blood Fountain", "quantidade": 3 },
           { "card": "Cast Down", "quantidade": 1 },
@@ -87,7 +87,7 @@ export default defineEventHandler(async (event): Promise<Decklist> => {
             ]
           }
         ],
-        "nota": "Este é um exemplo de guia de sideboard detalhado para Affinity Pauper. As estratégias e o sideboard podem variar dependendo do metagame específico e das escolhas do jogador profissional."
+        "descricao": "Este é um exemplo de guia de sideboard detalhado para Affinity Pauper. As estratégias e o sideboard podem variar dependendo do metagame específico e das escolhas do jogador profissional."
       };
     case '2': // Mockup para guide ID 2 (Outro deck - Exemplo Simplificado)
       return {
@@ -106,7 +106,7 @@ export default defineEventHandler(async (event): Promise<Decklist> => {
           { "card": "Rending Volley", "quantidade": 3 }
         ],
         "estrategias": [], // Sem estratégias detalhadas para este exemplo mais simples
-        "nota": "Este é um exemplo de decklist Mono Red Aggro para o guia com ID 2 (exemplo mais simples, sem estratégias detalhadas)."
+        "descricao": "Este é um exemplo de decklist Mono Red Aggro para o guia com ID 2 (exemplo mais simples, sem estratégias detalhadas)."
       };
     default: // Mockup para qualquer outro ID (Guia não encontrado)
       throw createError({

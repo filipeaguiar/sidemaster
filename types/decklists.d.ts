@@ -22,5 +22,5 @@ export interface Decklist {
   maindeck: CardEntry[];
   sideboard: CardEntry[];
   estrategias: Estrategia[];
-  nota: string;
+  descricao: string;
 }
