@@ -14,7 +14,7 @@ export interface Estrategia {
 
 export interface Decklist {
   id: number;
-  player: string;
+  user_id: string;
   versão: string;
   release_date: string;
   formato: string;

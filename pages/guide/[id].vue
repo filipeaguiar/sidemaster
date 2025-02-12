@@ -11,14 +11,13 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-3xl font-bold text-gray-900">Guia de Sideboard</h1>
-              <h2 class="text-xl text-gray-700 mt-1">para <span class="font-semibold text-blue-600">{{
+              <h1 class="text-3xl font-bold text-gray-900">{{ guide.user_id }}</h1>
+              <h2 class="text-xl text-gray-700 mt-1"><span class="font-semibold text-blue-600">{{
                 guide.deck_archetype }}</span></h2>
             </div>
-            <UBadge color="blue" variant="subtle">Versão {{ guide.versão }}</UBadge>
+            <UBadge color="primary" variant="outline">Versão {{ guide.versão }}</UBadge>
           </div>
           <div class="mt-4 flex space-x-4 text-gray-600">
-            <div><span class="font-medium">Jogador:</span> {{ guide.player }}</div>
             <div><span class="font-medium">Formato:</span> {{ guide.formato }}</div>
             <div><span class="font-medium">Lançamento:</span> {{ guide.release_date }}</div>
           </div>
@@ -30,9 +29,9 @@
             <ul role="list" class="list-disc pl-5 text-gray-700">
               <li v-for="card in guide.maindeck" :key="card.card" class="mb-1">
                 <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
-                  @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
+                  @mouseover="handleCardMouseOver(card.card!, $event)" @mouseout="handleCardMouseOut">{{ card.card!
                   }}</span>
-                <span class="text-gray-500">x{{ card.quantidade }}</span>
+                <span class="text-gray-300"> x{{ card.quantidade }}</span>
               </li>
             </ul>
           </section>
@@ -44,7 +43,7 @@
                 <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                   @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
                   }}</span>
-                <span class="text-gray-500">x{{ card.quantidade }}</span>
+                <span class="text-gray-500"> x{{ card.quantidade }}</span>
               </li>
             </ul>
           </section>
@@ -52,10 +51,10 @@
 
         <section v-if="guide.descricao" class="mb-8">
           <h3 class="text-xl font-semibold text-gray-800 mb-3">Descrição do Deck</h3>
-          <UCard class="mb-8 bg-gray-50 rounded-md p-4 text-gray-700 leading-loose">
-            <template #body>
-              <div v-html="formatTextWithCardLinks(guide.descricao)"></div>
-            </template>
+          <UCard class="mb-8 bg-gray-50 rounded-md p-4 text-gray-700">
+            <div v-html="formattedDescricao" id="descricao" @mouseover="delegateCardMouseOver"
+              @mouseout="delegateCardMouseOut">
+            </div>
           </UCard>
         </section>
 
@@ -64,23 +63,28 @@
           <div v-for="(estrategia, index) in guide.estrategias" :key="index" class="mb-4">
             <UCard>
               <template #header>
-                <h4 class="text-lg font-semibold text-gray-900">Contra: <span class="font-medium text-indigo-600">{{
+                <h4 class="text-lg font-semibold text-gray-900"><span class="font-medium text-indigo-600">{{
                   estrategia.deck_oponente }}</span></h4>
               </template>
               <div class="p-4">
-                <p class="text-gray-700 mb-3"><strong class="font-medium">Estratégia Geral:</strong>
-                <div v-html="formatTextWithCardLinks(estrategia.estrategia_geral)" inline></div>
-                </p>
+                <div class="text-gray-700 mb-3"><strong class="font-medium">Estratégia Geral:</strong>
+                  <div v-html="formatarEstrategiaGeral(estrategia.estrategia_geral)" inline
+                    class="estrategia-geral-container" @mouseover="delegateCardMouseOver"
+                    @mouseout="delegateCardMouseOut">
+                  </div>
+                </div>
 
                 <div class="mb-2">
                   <h5 class="text-md font-semibold text-gray-800 mb-1">Side In</h5>
                   <ul role="list" class="list-disc pl-5 text-gray-700 text-sm">
-                    <li v-for="(card, cardIndex) in estrategia.side_in" :key="card.card" class="mb-0.5">
+                    <li v-for="(card) in estrategia.side_in" :key="card.card" class="mb-0.5">
                       <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                         @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
                         }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
                         class="italic text-gray-600">
-                        <div v-html="formatTextWithCardLinks(card.motivo)" inline></div>
+                        <div v-if="card.motivo" v-html="formatTextWithCardLinks(card.motivo)" inline
+                          class="motivo-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
+                        </div>
                       </span>
                     </li>
                   </ul>
@@ -89,12 +93,14 @@
                 <div>
                   <h5 class="text-md font-semibold text-gray-800 mb-1">Side Out</h5>
                   <ul role="list" class="list-disc pl-5 text-gray-700 text-sm">
-                    <li v-for="(card, cardIndex) in estrategia.side_out" :key="card.card" class="mb-0.5">
+                    <li v-for="(card) in estrategia.side_out" :key="card.card" class="mb-0.5">
                       <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                         @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
                         }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
                         class="italic text-gray-600">
-                        <div v-html="formatTextWithCardLinks(card.motivo)" inline></div>
+                        <div v-if="card.motivo" v-html="formatTextWithCardLinks(card.motivo)" inline
+                          class="motivo-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
+                        </div>
                       </span>
                     </li>
                   </ul>
@@ -122,14 +128,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import type { Decklist } from '@/types/guide/decklist';
+import { ref, onMounted, computed } from 'vue';
+import type { Decklist } from '~/types/decklists';
 import CardImagePopup from '~/components/CardImagePopup.vue';
 
 useHead({
   title: 'Guia de Sideboard',
   meta: [
-    { name: 'description', content: 'Guia de sideboard para Magic: The Gathering' },
+    {
+      name: 'description',
+      content: 'Guia de sideboard para Magic: The Gathering',
+    },
   ],
 });
 
@@ -139,7 +148,7 @@ const guide = ref<Decklist | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 const cardImageCache = ref<{ [cardName: string]: string }>({});
-
+const cardNameRegex = /\[\[([^\]]+?)\]\]/g;
 const popupCardName = ref('');
 const isPopupVisible = ref(false);
 const popupPosition = ref({ top: '0px', left: '0px' });
@@ -152,6 +161,55 @@ const updatePopupPosition = (event: MouseEvent) => {
       top: `${event.clientY + 15}px`,
       left: `${event.clientX + 15}px`,
     };
+  }
+};
+
+const formatTextWithCardLinks = (texto: string): string => {
+  if (!texto) return '';
+  return texto.replace(cardNameRegex, (_match, cardName) => {
+    return `<span class="card-name font-bold hover:text-blue-600 hover:underline cursor-pointer">${cardName}</span>`; // Removidos eventos inline
+  });
+};
+
+const formatarEstrategiaGeral = computed(() => (texto: string | undefined): string => {
+  if (!texto) return '';
+  const paragrafos = texto.split('\n').map(linha => {
+    if (linha.trim() !== '') {
+      const linhaComLinks = formatTextWithCardLinks(linha);
+      return `<p class="indent-5 mb-4">${linhaComLinks}</p>`;
+    } else {
+      return '';
+    }
+  }).join('');
+  return paragrafos;
+});
+
+
+const formattedDescricao = computed(() => {
+  if (!guide.value?.descricao) return '';
+  const paragrafos = guide.value.descricao.split('\n').map(linha => {
+    if (linha.trim() !== '') {
+      const linhaComLinks = formatTextWithCardLinks(linha);
+      return `<p class="indent-5 mb-4">${linhaComLinks}</p>`;
+    } else {
+      return '';
+    }
+  }).join('');
+  return paragrafos;
+});
+
+const delegateCardMouseOver = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.classList.contains('card-name')) {
+    const cardName = target.textContent || '';
+    handleCardMouseOver(cardName, event);
+  }
+};
+
+const delegateCardMouseOut = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.classList.contains('card-name')) {
+    handleCardMouseOut();
   }
 };
 
@@ -183,16 +241,6 @@ const handleCardMouseOut = () => {
 };
 
 
-const formatTextWithCardLinks = (text: string) => {
-  if (!text) return '';
-
-  const cardNameRegex = /\[\[([^\]]+?)\]\]/g;
-  return text.replace(cardNameRegex, (match, cardName) => {
-    return `<span class="card-name font-bold hover:text-blue-600 hover:underline cursor-pointer" @mouseover="handleCardMouseOver('${cardName}', $event)" @mouseout="handleCardMouseOut">${cardName}</span>`;
-  });
-};
-
-
 onMounted(async () => {
   isLoading.value = true;
   error.value = null;
@@ -208,6 +256,7 @@ onMounted(async () => {
 
   } catch (e: any) {
     error.value = e.message || 'Erro desconhecido ao carregar o guia.';
+    console.error("Erro ao carregar guia:", e);
     guide.value = null;
   } finally {
     isLoading.value = false;
@@ -223,10 +272,27 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
   decklist.estrategias?.forEach(estrategia => {
     estrategia.side_in.forEach(cardEntry => allCardNames.add(cardEntry.card));
     estrategia.side_out.forEach(cardEntry => allCardNames.add(cardEntry.card));
+    // Adicionar cartas da estratégia geral
+    const estrategiaGeralText = estrategia.estrategia_geral || '';
+    let matchEstrategia;
+    while ((matchEstrategia = cardNameRegex.exec(estrategiaGeralText)) !== null) {
+      allCardNames.add(matchEstrategia[1]);
+    }
   });
 
-  const cache: { [cardName: string]: string } = {};
+  // Adicionar cartas da descrição do deck
+  const descricaoText = decklist.descricao || '';
+  let matchDescricao;
+  while ((matchDescricao = cardNameRegex.exec(descricaoText)) !== null) {
+    allCardNames.add(matchDescricao[1]);
+  }
+
+
+  const cache: { [cardName: string]: string } = { ...cardImageCache.value };
   for (const cardName of allCardNames) {
+    if (cache[cardName]) {
+      continue;
+    }
     try {
       const cardResponse: any = await $fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(cardName)}`);
       cache[cardName] = cardResponse.image_uris?.small || '';
@@ -236,10 +302,13 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
     }
   }
   cardImageCache.value = cache;
-};
+};;
 
 </script>
 
 <style scoped>
-/* Estilos scoped removidos */
+#descricao p {
+  text-indent: 1rem;
+  margin-bottom: 0.5rem;
+}
 </style>
