@@ -15,10 +15,10 @@
               <h2 class="text-xl text-gray-700 mt-1"><span class="font-semibold text-blue-600">{{
                 guide.deck_archetype }}</span></h2>
             </div>
-            <UBadge color="primary" variant="outline">Versão {{ guide.versão }}</UBadge>
+            <UBadge color="primary" variant="outline">Versão {{ guide.version }}</UBadge>
           </div>
           <div class="mt-4 flex space-x-4 text-gray-600">
-            <div><span class="font-medium">Formato:</span> {{ guide.formato }}</div>
+            <div><span class="font-medium">Formato:</span> {{ guide.format }}</div>
             <div><span class="font-medium">Lançamento:</span> {{ guide.release_date }}</div>
           </div>
         </template>
@@ -31,7 +31,7 @@
                 <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                   @mouseover="handleCardMouseOver(card.card!, $event)" @mouseout="handleCardMouseOut">{{ card.card!
                   }}</span>
-                <span class="text-gray-300"> x{{ card.quantidade }}</span>
+                <span class="text-gray-300"> x{{ card.quantity }}</span>
               </li>
             </ul>
           </section>
@@ -43,32 +43,33 @@
                 <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                   @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
                   }}</span>
-                <span class="text-gray-500"> x{{ card.quantidade }}</span>
+                <span class="text-gray-500"> x{{ card.quantity }}</span>
               </li>
             </ul>
           </section>
         </div>
 
-        <section v-if="guide.descricao" class="mb-8">
+        <section v-if="guide.description" class="mb-8">
           <h3 class="text-xl font-semibold text-gray-800 mb-3">Descrição do Deck</h3>
           <UCard class="mb-8 bg-gray-50 rounded-md p-4 text-gray-700">
-            <div v-html="formattedDescricao" id="descricao" @mouseover="delegateCardMouseOver"
+            <!-- <div v-html="formattedDescricao" id="descricao" @mouseover="delegateCardMouseOver" -->
+            <div v-html="'<p>teste</p>'" id="descricao" @mouseover="delegateCardMouseOver"
               @mouseout="delegateCardMouseOut">
             </div>
           </UCard>
         </section>
 
-        <section v-if="guide.estrategias && guide.estrategias.length > 0" class="mb-8">
+        <section v-if="guide.strategies && guide.strategies.length > 0" class="mb-8">
           <h3 class="text-xl font-semibold text-gray-800 mb-4">Estratégias de Sideboard</h3>
-          <div v-for="(estrategia, index) in guide.estrategias" :key="index" class="mb-4">
+          <div v-for="(estrategia, index) in guide.strategies" :key="index" class="mb-4">
             <UCard>
               <template #header>
                 <h4 class="text-lg font-semibold text-gray-900"><span class="font-medium text-indigo-600">{{
-                  estrategia.deck_oponente }}</span></h4>
+                  estrategia.opponent_deck_archetype }}</span></h4>
               </template>
               <div class="p-4">
                 <div class="text-gray-700 mb-3"><strong class="font-medium">Estratégia Geral:</strong>
-                  <div v-html="formatarEstrategiaGeral(estrategia.estrategia_geral)" inline
+                  <div v-html="formatarEstrategiaGeral(estrategia.general_strategy)" inline
                     class="estrategia-geral-container" @mouseover="delegateCardMouseOver"
                     @mouseout="delegateCardMouseOut">
                   </div>
@@ -80,10 +81,10 @@
                     <li v-for="(card) in estrategia.side_in" :key="card.card" class="mb-0.5">
                       <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                         @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
-                        }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
+                        }}</span> <span class="text-gray-500">x{{ card.quantity }}</span> - <span
                         class="italic text-gray-600">
-                        <div v-if="card.motivo" v-html="formatTextWithCardLinks(card.motivo)" inline
-                          class="motivo-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
+                        <div v-if="card.reason" v-html="formatTextWithCardLinks(card.reason)" inline
+                          class="reason-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
                         </div>
                       </span>
                     </li>
@@ -96,10 +97,10 @@
                     <li v-for="(card) in estrategia.side_out" :key="card.card" class="mb-0.5">
                       <span class="card-name hover:text-blue-600 hover:underline cursor-pointer"
                         @mouseover="handleCardMouseOver(card.card, $event)" @mouseout="handleCardMouseOut">{{ card.card
-                        }}</span> <span class="text-gray-500">x{{ card.quantidade }}</span> - <span
+                        }}</span> <span class="text-gray-500">x{{ card.quantity }}</span> - <span
                         class="italic text-gray-600">
-                        <div v-if="card.motivo" v-html="formatTextWithCardLinks(card.motivo)" inline
-                          class="motivo-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
+                        <div v-if="card.reason" v-html="formatTextWithCardLinks(card.reason)" inline
+                          class="reason-container" @mouseover="delegateCardMouseOver" @mouseout="delegateCardMouseOut">
                         </div>
                       </span>
                     </li>
@@ -129,7 +130,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import type { Decklist } from '~/types/decklists';
+import type { Decklist, CardEntry } from '~/types/decklists';
 import CardImagePopup from '~/components/CardImagePopup.vue';
 
 useHead({
@@ -186,8 +187,8 @@ const formatarEstrategiaGeral = computed(() => (texto: string | undefined): stri
 
 
 const formattedDescricao = computed(() => {
-  if (!guide.value?.descricao) return '';
-  const paragrafos = guide.value.descricao.split('\n').map(linha => {
+  if (!guide.value?.description) return '';
+  const paragrafos = guide.value.description.split('\n').map(linha => {
     if (linha.trim() !== '') {
       const linhaComLinks = formatTextWithCardLinks(linha);
       return `<p class="indent-5 mb-4">${linhaComLinks}</p>`;
@@ -269,11 +270,11 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
 
   decklist.maindeck.forEach(cardEntry => allCardNames.add(cardEntry.card));
   decklist.sideboard.forEach(cardEntry => allCardNames.add(cardEntry.card));
-  decklist.estrategias?.forEach(estrategia => {
+  decklist.strategies?.forEach(estrategia => {
     estrategia.side_in.forEach(cardEntry => allCardNames.add(cardEntry.card));
     estrategia.side_out.forEach(cardEntry => allCardNames.add(cardEntry.card));
     // Adicionar cartas da estratégia geral
-    const estrategiaGeralText = estrategia.estrategia_geral || '';
+    const estrategiaGeralText = estrategia.general_strategy || '';
     let matchEstrategia;
     while ((matchEstrategia = cardNameRegex.exec(estrategiaGeralText)) !== null) {
       allCardNames.add(matchEstrategia[1]);
@@ -281,7 +282,7 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
   });
 
   // Adicionar cartas da descrição do deck
-  const descricaoText = decklist.descricao || '';
+  const descricaoText = decklist.description || '';
   let matchDescricao;
   while ((matchDescricao = cardNameRegex.exec(descricaoText)) !== null) {
     allCardNames.add(matchDescricao[1]);

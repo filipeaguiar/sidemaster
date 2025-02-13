@@ -1,26 +1,28 @@
 // types/guide/decklist.d.ts
 export interface CardEntry {
-  card: string;
-  quantidade: number;
-  motivo?: string;
-}
-
-export interface Estrategia {
-  deck_oponente: string;
-  estrategia_geral: string;
-  side_in: CardEntry[];
-  side_out: CardEntry[];
+  card_name: string;
+  quantity: number;
+  reason?: string;
 }
 
 export interface Decklist {
-  id: number;
+  id?: string;
   user_id: string;
-  versão: string;
+  version: string;
   release_date: string;
-  formato: string;
+  format: string;
   deck_archetype: string;
-  maindeck: CardEntry[];
-  sideboard: CardEntry[];
-  estrategias: Estrategia[];
-  descricao: string;
+  maindeck: { card: string; quantity: number }[];
+  sideboard: { card: string; quantity: number }[];
+  strategies: Strategy[];
+  description: string;
+  decklist_input?: string;
 }
+
+export interface Strategy {
+  opponent_deck_archetype: string;
+  general_strategy: string;
+  side_in: { card: string; quantity: number; reason?: string }[];
+  side_out: { card: string; quantity: number; reason?: string }[];
+}
+
