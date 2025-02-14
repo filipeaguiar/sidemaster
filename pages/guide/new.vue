@@ -13,7 +13,7 @@ const guideData = ref<Decklist>({
   format: 'Pioneer',
   version: '1.0',
   release_date: new Date().toISOString().slice(0, 10),
-  description: '', // ✅ Campo de Descrição (agora visível!)
+  description: '',
   maindeck: [],
   sideboard: [],
   strategies: [],
@@ -105,16 +105,16 @@ const removeSideOutCard = (strategyIndex: number, cardIndex: number) => {
 // Submit
 const submissionError = ref<string | null>(null);
 const submissionSuccess = ref(false);
-const isSubmitting = ref(false); // ✅ Ref para controlar o estado de "carregando" do botão
+const isSubmitting = ref(false);
 
 const submitGuide = async () => {
   submissionError.value = null;
   submissionSuccess.value = false;
-  isSubmitting.value = true; // ✅ Defina isSubmitting como true no início da submissão
+  isSubmitting.value = true;
 
   if (!user.value?.id) {
     submissionError.value = 'Usuário não autenticado';
-    isSubmitting.value = false; // ✅ Reative o botão em caso de erro de autenticação
+    isSubmitting.value = false;
     return;
   }
   console.log('Dados do Guia ANTES de enviar:', guideData.value)
@@ -131,100 +131,136 @@ const submitGuide = async () => {
 
     if (response) {
       submissionSuccess.value = true;
-      isSubmitting.value = false; // ✅ Reative o botão após sucesso
+      isSubmitting.value = false;
       setTimeout(() => router.push('/'), 2000);
     }
   } catch (error: any) {
     submissionError.value = error.data?.message || 'Erro ao salvar';
-    isSubmitting.value = false; // ✅ Reative o botão em caso de erro na requisição
+    isSubmitting.value = false;
   }
 };
 </script>
 
 <template>
-  <div class="container mx-auto p-4 flex flex-col">
-    <UFormGroup label="Arquétipo do Deck" class="mb-4">
-      <UInput v-model="guideData.deck_archetype" />
-    </UFormGroup>
+  <div class="container mx-auto p-4 relative">
+    <UContainer class="space-y-8">
+      <UCard>
+        <template #header>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            Criar Novo Guia de Deck
+          </h1>
+        </template>
 
-    <UFormGroup label="Formato" class="mb-4">
-      <USelect v-model="guideData.format" :options="formatoOptions" />
-    </UFormGroup>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section class="col-span-1">
+            <UFormGroup label="Arquétipo do Deck">
+              <UInput v-model="guideData.deck_archetype" placeholder="Ex: Rakdos Scam" />
+            </UFormGroup>
 
-    <UFormGroup label="Versão do Guia" class="mb-4">
-      <UInput v-model="guideData.version" />
-    </UFormGroup>
+            <UFormGroup label="Formato">
+              <USelect v-model="guideData.format" :options="formatoOptions" />
+            </UFormGroup>
 
-    <UFormGroup label="Data de Lançamento" class="mb-4">
-      <UInput v-model="guideData.release_date" type="date" />
-    </UFormGroup>
+            <UFormGroup label="Versão do Guia">
+              <UInput v-model="guideData.version" placeholder="Ex: 1.0, Atualizado em Janeiro/2024" />
+            </UFormGroup>
 
-    <UFormGroup label="Descrição do Deck" class="mb-4">
-      <UTextarea v-model="guideData.description" placeholder="Escreva uma descrição detalhada do seu deck..." />
-    </UFormGroup>
+            <UFormGroup label="Data de Lançamento">
+              <UInput v-model="guideData.release_date" type="date" />
+            </UFormGroup>
+          </section>
 
-    <UFormGroup label="Lista do Deck" class="mb-2">
-      <UTextarea v-model="guideData.decklist_input" @blur="parseDecklist"
-        placeholder="4 Carta 1\n3 Carta 2\n2 Carta Sideboard" rows="15" class="font-mono" />
-    </UFormGroup>
+          <section class="col-span-1">
+            <UFormGroup label="Descrição do Deck">
+              <UTextarea v-model="guideData.description" rows="5"
+                placeholder="Escreva uma descrição detalhada do seu deck, suas estratégias gerais e o que o torna único." />
+            </UFormGroup>
+          </section>
+        </div>
+      </UCard>
 
-    <div v-for="(strategy, idx) in guideData.strategies" :key="idx" class="mb-6 p-4 bg-gray-50 rounded-lg">
-      <div class="flex justify-between items-center mb-4">
-        <UInput v-model="strategy.opponent_deck_archetype" placeholder="Deck Oponente" />
-        <UButton color="red" icon="i-heroicons-trash" @click="guideData.strategies.splice(idx, 1)" />
-      </div>
+      <UCard>
+        <template #header>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Lista do Deck
+          </h2>
+        </template>
+        <UFormGroup label="Cole sua Decklist abaixo">
+          <UTextarea v-model="guideData.decklist_input" @blur="parseDecklist"
+            placeholder="Cole sua lista aqui. Exemplo:\n4 Carta 1\n3 Carta 2\n...\n\n2 Carta Sideboard" rows="15"
+            class="font-mono" />
+        </UFormGroup>
+      </UCard>
 
-      <UTextarea v-model="strategy.general_strategy" placeholder="Estratégia Geral" class="mb-2" />
+      <UCard>
+        <template #header>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Estratégias de Sideboard
+          </h2>
+        </template>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h3 class="font-bold mb-2">Side In</h3>
-          <div v-for="(card, cardIdx) in strategy.side_in" :key="cardIdx" class="flex gap-2 mb-2">
-            <UInput v-model.number="card.quantity" type="number" class="w-20" />
-            <UInput v-model="card.card" placeholder="Carta" />
-            <UTextarea v-model="card.reason" placeholder="Motivo" />
-            <UButton color="red" icon="i-heroicons-trash" @click="removeSideInCard(idx, cardIdx)" />
+        <div v-for="(strategy, idx) in guideData.strategies" :key="idx" class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div class="flex justify-between items-center mb-4">
+            <UInput v-model="strategy.opponent_deck_archetype" placeholder="Arquétipo do Deck Oponente" />
+            <UButton color="red" icon="i-heroicons-trash" @click="guideData.strategies.splice(idx, 1)" />
           </div>
-          <UButton @click="addSideInCard(idx)" block>Adicionar Side In</UButton>
+          <UFormGroup label="Estratégia Geral">
+            <UTextarea v-model="strategy.general_strategy"
+              placeholder="Escreva a estratégia geral contra este arquétipo." rows="3" />
+          </UFormGroup>
+
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-bold mb-2">Side In</h3>
+              <div v-for="(card, cardIdx) in strategy.side_in" :key="cardIdx" class="flex gap-2 mb-2">
+                <UInput v-model.number="card.quantity" type="number" class="w-20" />
+                <UInput v-model="card.card" placeholder="Carta" />
+                <UTextarea v-model="card.reason" placeholder="Motivo" rows="1" />
+                <UButton color="red" icon="i-heroicons-trash" @click="removeSideInCard(idx, cardIdx)" />
+              </div>
+              <UButton @click="addSideInCard(idx)" block>Adicionar Side In</UButton>
+            </div>
+
+            <div>
+              <h3 class="font-bold mb-2">Side Out</h3>
+              <div v-for="(card, cardIdx) in strategy.side_out" :key="cardIdx" class="flex gap-2 mb-2">
+                <UInput v-model.number="card.quantity" type="number" class="w-20" />
+                <UInput v-model="card.card" placeholder="Carta" />
+                <UTextarea v-model="card.reason" placeholder="Motivo" rows="1" />
+                <UButton color="red" icon="i-heroicons-trash" @click="removeSideOutCard(idx, cardIdx)" />
+              </div>
+              <UButton @click="addSideOutCard(idx)" block>Adicionar Side Out</UButton>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <h3 class="font-bold mb-2">Side Out</h3>
-          <div v-for="(card, cardIdx) in strategy.side_out" :key="cardIdx" class="flex gap-2 mb-2">
-            <UInput v-model.number="card.quantity" type="number" class="w-20" />
-            <UInput v-model="card.card" placeholder="Carta" />
-            <UTextarea v-model="card.reason" placeholder="Motivo" />
-            <UButton color="red" icon="i-heroicons-trash" @click="removeSideOutCard(idx, cardIdx)" />
-          </div>
-          <UButton @click="addSideOutCard(idx)" block>Adicionar Side Out</UButton>
-        </div>
+        <UButton @click="addStrategy" icon="i-heroicons-plus" class="mt-4" block variant="outline">
+          Adicionar Estratégia
+        </UButton>
+      </UCard>
+
+      <div class="flex justify-end mt-8">
+        <UButton @click="submitGuide" color="primary" :loading="isSubmitting">
+          Publicar Guia
+        </UButton>
       </div>
-    </div>
 
-    <UButton @click="addStrategy" icon="i-heroicons-plus" class="mt-4">
-      Adicionar Estratégia
-    </UButton>
-
-    <UButton @click="submitGuide" color="primary" class="mt-8 mt-auto" :loading="isSubmitting"> Publicar Guia
-    </UButton>
-
-    <UAlert v-if="submissionError" color="red" class="mt-4">
-      {{ submissionError }}
-    </UAlert>
+      <UAlert v-if="submissionError" color="red" class="mt-4">
+        {{ submissionError }}
+      </UAlert>
+    </UContainer>
   </div>
 </template>
 
 <style scoped>
-/* Estilos específicos do componente podem ser adicionados aqui */
-.container {
-  display: flex;
-  /* Garante que o container é flexível */
-  flex-direction: column;
-  /* Organiza os filhos em coluna */
-}
+/* Estilos específicos do componente podem ser adicionados aqui, se necessário */
+/*.container {*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*}*/
 
 .mt-auto {
   margin-top: auto;
-  /* Empurra o botão para baixo */
 }
 </style>

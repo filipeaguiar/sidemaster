@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
   )
 
   return {
-    guide,
+    ...guide,
     maindeck: maindeckCards || [],
     sideboard: sideboardCards || [],
     strategies: strategiesWithCards || [],
