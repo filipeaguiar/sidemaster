@@ -1,5 +1,4 @@
 import { serverSupabaseClient } from '#supabase/server'
-import { DecklistSchema } from '~/server/utils/schemas' // Assumindo que você tem um schema de validação
 
 export default defineEventHandler(async (event) => {
   const guideId = getRouterParam(event, 'id')
@@ -24,28 +23,30 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // --- Validação do Corpo da Requisição ---
-  let parsedPayload;
+  // --- Ler o Corpo da Requisição SEM Validação ---
+  let requestBody;
   try {
-    parsedPayload = await readValidatedBody(event, DecklistSchema.partial().parse) // Usando o schema e .partial() para edição
+    requestBody = await readBody(event) // Lê o body da requisição SEM validação
   } catch (error: any) {
-    console.error("Erro de validação ao editar guia:", error)
+    console.error("Erro ao ler o corpo da requisição na edição do guia:", error)
     throw createError({
       statusCode: 400,
-      message: 'Dados de requisição inválidos.',
-      details: error.errors
+      message: 'Erro ao ler dados da requisição.',
+      details: error.message
     })
   }
 
   // Remover decklist_input do payload para evitar salvar string grande desnecessariamente
-  delete parsedPayload.decklist_input;
+  if (requestBody && typeof requestBody === 'object' && requestBody.decklist_input) {
+    delete requestBody.decklist_input;
+  }
 
   try {
     // --- Atualizar o guia no Supabase ---
     const { data: updatedGuide, error: updateError } = await supabase
       .from('guides')
       .update({
-        ...parsedPayload,
+        ...requestBody, // Usa o corpo da requisição diretamente (sem validação Zod)
         user_id: user.id // Garante que o user_id não seja alterado indevidamente
       })
       .eq('id', guideId)

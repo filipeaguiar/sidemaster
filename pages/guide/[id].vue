@@ -42,7 +42,20 @@
             </div>
           </div>
         </template>
-
+        <!-- Descrição do Deck -->
+        <section v-if="guide.description">
+          <UCard class="hover:shadow-lg transition-shadow mb-4">
+            <template #header>
+              <h3 class="text-lg font-semibold text-primary-600">
+                Descrição do Deck
+              </h3>
+            </template>
+            <div class="prose max-w-none dark:prose-invert">
+              <div v-html="formattedDescricao" id="descricao" @mouseover="delegateCardMouseOver"
+                @mouseout="delegateCardMouseOut" />
+            </div>
+          </UCard>
+        </section>
         <!-- Maindeck e Sideboard -->
         <div class="grid md:grid-cols-2 gap-6">
           <section>
@@ -88,20 +101,7 @@
           </section>
         </div>
 
-        <!-- Descrição do Deck -->
-        <section v-if="guide.description">
-          <UCard class="hover:shadow-lg transition-shadow mb-4">
-            <template #header>
-              <h3 class="text-lg font-semibold text-primary-600">
-                Descrição do Deck
-              </h3>
-            </template>
-            <div class="prose max-w-none dark:prose-invert">
-              <div v-html="formattedDescricao" id="descricao" @mouseover="delegateCardMouseOver"
-                @mouseout="delegateCardMouseOut" />
-            </div>
-          </UCard>
-        </section>
+
 
         <!-- Estratégias -->
         <section v-if="guide.strategies?.length">

@@ -172,14 +172,12 @@ useHead({
 });
 
 </script>
-
 <template>
   <div class="container mx-auto p-4 relative">
     <UContainer v-if="isLoading" class="text-center text-gray-500 my-8">
       <div class="flex flex-col items-center justify-center h-64">
         <UIcon name="i-heroicons-arrow-path-20-solid" class="w-12 h-12 animate-spin text-primary-500" />
-        <p class="mt-4 text-lg font-medium">Carregando guia para edição...</p> {/* ✅ Texto de carregamento específico
-        */}
+        <p class="mt-4 text-lg font-medium">Carregando guia para edição...</p>
       </div>
     </UContainer>
 
@@ -188,12 +186,11 @@ useHead({
         :description="error" color="red" variant="outline" class="max-w-2xl mx-auto" />
     </UContainer>
 
-    <UContainer v-else class="space-y-6 max-w-screen-xl mx-auto"> {/* ✅ UContainer principal para o formulário de edição
-      */}
+    <UContainer v-else class="space-y-6 max-w-screen-xl mx-auto">
       <UCard>
         <template #header>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-            Editar Guia de Deck {/* ✅ Título da página de edição */}
+            Editar Guia de Deck
           </h1>
         </template>
 
@@ -215,14 +212,19 @@ useHead({
               <UInput v-model="guideData.release_date" type="date" />
             </UFormGroup>
           </section>
-
-          <section class="col-span-1">
-            <UFormGroup label="Descrição do Deck">
-              <UTextarea v-model="guideData.description" rows="5"
-                placeholder="Escreva uma descrição detalhada do seu deck, suas estratégias gerais e o que o torna único." />
-            </UFormGroup>
-          </section>
         </div>
+      </UCard>
+
+      <UCard>
+        <template #header>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Descrição do Deck
+          </h2>
+        </template>
+        <UFormGroup>
+          <UTextarea v-model="guideData.description" rows="20"
+            placeholder="Escreva uma descrição detalhada do seu deck, suas estratégias gerais e o que o torna único." />
+        </UFormGroup>
       </UCard>
 
       <UCard>
@@ -231,11 +233,32 @@ useHead({
             Lista do Deck
           </h2>
         </template>
-        <UFormGroup label="Cole sua Decklist abaixo">
-          <UTextarea v-model="guideData.decklist_input" @blur="parseDecklist"
-            placeholder="Cole sua lista aqui. Exemplo:\n4 Carta 1\n3 Carta 2\n...\n\n2 Carta Sideboard" rows="15"
-            class="font-mono" />
-        </UFormGroup>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="font-bold mb-2">Maindeck</h3>
+            <div v-for="(card, cardIdx) in guideData.maindeck" :key="`maindeck-${cardIdx}`"
+              class="flex gap-2 mb-2 items-center">
+              <UInput v-model.number="card.quantity" type="number" class="w-16" />
+              <UInput v-model="card.card_name" placeholder="Nome da Carta" />
+              <UButton color="red" icon="i-heroicons-trash" @click="guideData.maindeck.splice(cardIdx, 1)" />
+            </div>
+            <UButton @click="guideData.maindeck.push({ card: '', quantity: 1 })" block>Adicionar Carta ao Maindeck
+            </UButton>
+          </div>
+
+          <div>
+            <h3 class="font-bold mb-2">Sideboard</h3>
+            <div v-for="(card, cardIdx) in guideData.sideboard" :key="`sideboard-${cardIdx}`"
+              class="flex gap-2 mb-2 items-center">
+              <UInput v-model.number="card.quantity" type="number" class="w-16" />
+              <UInput v-model="card.card_name" placeholder="Nome da Carta" />
+              <UButton color="red" icon="i-heroicons-trash" @click="guideData.sideboard.splice(cardIdx, 1)" />
+            </div>
+            <UButton @click="guideData.sideboard.push({ card: '', quantity: 1 })" block>Adicionar Carta ao Sideboard
+            </UButton>
+          </div>
+        </div>
       </UCard>
 
       <UCard>
@@ -261,7 +284,7 @@ useHead({
               <h3 class="font-bold mb-2">Side In</h3>
               <div v-for="(card, cardIdx) in strategy.side_in" :key="cardIdx" class="flex gap-2 mb-2">
                 <UInput v-model.number="card.quantity" type="number" class="w-20" />
-                <UInput v-model="card.card" placeholder="Carta" />
+                <UInput v-model="card.card_name" placeholder="Carta" />
                 <UTextarea v-model="card.reason" placeholder="Motivo" rows="1" />
                 <UButton color="red" icon="i-heroicons-trash" @click="removeSideInCard(idx, cardIdx)" />
               </div>
@@ -272,7 +295,7 @@ useHead({
               <h3 class="font-bold mb-2">Side Out</h3>
               <div v-for="(card, cardIdx) in strategy.side_out" :key="cardIdx" class="flex gap-2 mb-2">
                 <UInput v-model.number="card.quantity" type="number" class="w-20" />
-                <UInput v-model="card.card" placeholder="Carta" />
+                <UInput v-model="card.card_name" placeholder="Carta" />
                 <UTextarea v-model="card.reason" placeholder="Motivo" rows="1" />
                 <UButton color="red" icon="i-heroicons-trash" @click="removeSideOutCard(idx, cardIdx)" />
               </div>
@@ -288,7 +311,7 @@ useHead({
 
       <div class="flex justify-end mt-8">
         <UButton @click="submitGuide" color="primary" :loading="isSubmitting">
-          Salvar Edições {/* ✅ Texto do botão de submit para edição */}
+          Salvar Edições
         </UButton>
       </div>
 
@@ -298,6 +321,29 @@ useHead({
     </UContainer>
   </div>
 </template>
+
+<style scoped>
+/* Estilos específicos do componente podem ser adicionados aqui, se necessário */
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+</style>
+<style scoped>
+/* Estilos específicos do componente podem ser adicionados aqui, se necessário */
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+</style>
 
 <style scoped>
 /* Estilos específicos do componente podem ser adicionados aqui, se necessário */
