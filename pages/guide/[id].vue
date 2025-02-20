@@ -121,7 +121,7 @@
                       <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                         Estratégia Geral
                       </h4>
-                      <div class="prose-sm max-w-none dark:prose-invert"
+                      <div class="prose max-w-none dark:prose-invert"
                         v-html="formatarEstrategiaGeral(item.general_strategy)" @mouseover="delegateCardMouseOver"
                         @mouseout="delegateCardMouseOut" />
                     </div>
@@ -383,7 +383,7 @@ const fetchCardImagesInBackground = async (decklist: Decklist) => {
 }
 
 .prose :deep(.card-name) {
-  @apply font-medium border-b border-dashed border-gray-400 hover:border-primary-500;
+  @apply font-medium border-b font-bold border-dashed border-gray-400 hover:border-primary-500;
 }
 
 #descricao :deep(p) {
