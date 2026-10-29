@@ -27,10 +27,11 @@ jobs:
       - shell: bash
         run: |
           chmod +x release/SideMaster-1.0.0-x86_64.AppImage
-          export APPIMAGE_EXTRACT_AND_RUN=1
+          mkdir -p "$RUNNER_TEMP/sidemaster-appimage"
+          (cd "$RUNNER_TEMP/sidemaster-appimage" && "$GITHUB_WORKSPACE/release/SideMaster-1.0.0-x86_64.AppImage" --appimage-extract >/dev/null)
           export XDG_CONFIG_HOME="$RUNNER_TEMP/sidemaster-profile"
           export SIDEMASTER_PROFILE_DIR="$XDG_CONFIG_HOME/SideMaster"
-          export SIDEMASTER_APP_EXE="$GITHUB_WORKSPACE/release/SideMaster-1.0.0-x86_64.AppImage"
+          export SIDEMASTER_APP_EXE="$RUNNER_TEMP/sidemaster-appimage/squashfs-root/AppRun"
           export SIDEMASTER_TEST_OUTPUT_DIR="$SIDEMASTER_PROFILE_DIR/smoke-exports"
           mkdir -p "$XDG_CONFIG_HOME"
           timeout 120s xvfb-run -a bash -c '
@@ -39,7 +40,11 @@ jobs:
             app_pid=$!
             trap "kill $app_pid 2>/dev/null || true" EXIT
             node "$GITHUB_WORKSPACE/scripts/electron-smoke.mjs" edit-close
-            wait "$app_pid"
+            if wait "$app_pid"; then :; else
+              app_exit=$?
+              cat /tmp/sidemaster-electron.log
+              exit "$app_exit"
+            fi
             trap - EXIT
           '
           pdfinfo "$SIDEMASTER_TEST_OUTPUT_DIR/export-4.pdf" | grep -F 'Page size:       594.96 x 841.92 pts (A4)'
