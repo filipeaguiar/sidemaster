@@ -1,0 +1,92 @@
+name: Desktop packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  linux-appimage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y libfuse2t64 xvfb poppler-utils
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:linux
+      - run: test -s release/SideMaster-1.0.0-x86_64.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidemaster-linux-x64
+          path: release/SideMaster-1.0.0-x86_64.AppImage
+      - shell: bash
+        run: |
+          chmod +x release/SideMaster-1.0.0-x86_64.AppImage
+          export APPIMAGE_EXTRACT_AND_RUN=1
+          export XDG_CONFIG_HOME="$RUNNER_TEMP/sidemaster-profile"
+          export SIDEMASTER_PROFILE_DIR="$XDG_CONFIG_HOME/SideMaster"
+          export SIDEMASTER_APP_EXE="$GITHUB_WORKSPACE/release/SideMaster-1.0.0-x86_64.AppImage"
+          export SIDEMASTER_TEST_OUTPUT_DIR="$SIDEMASTER_PROFILE_DIR/smoke-exports"
+          mkdir -p "$XDG_CONFIG_HOME"
+          timeout 120s xvfb-run -a bash -c '
+            set -e
+            "$SIDEMASTER_APP_EXE" --no-sandbox --remote-debugging-port=9222 --inspect=9223 >/tmp/sidemaster-electron.log 2>&1 &
+            app_pid=$!
+            trap "kill $app_pid 2>/dev/null || true" EXIT
+            node "$GITHUB_WORKSPACE/scripts/electron-smoke.mjs" edit-close
+            wait "$app_pid"
+            trap - EXIT
+          '
+          pdfinfo "$SIDEMASTER_TEST_OUTPUT_DIR/export-4.pdf" | grep -F 'Page size:       594.96 x 841.92 pts (A4)'
+
+  windows-packages:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - shell: pwsh
+        run: |
+          $installer = Get-ChildItem release/SideMaster-1.0.0-Setup.exe
+          if (-not $installer -or $installer.Length -eq 0) { throw 'NSIS installer missing' }
+          $portable = Get-ChildItem release/SideMaster-1.0.0-Portable.exe
+          if (-not $portable -or $portable.Length -eq 0) { throw 'Portable executable missing' }
+          $installDir = Join-Path $env:RUNNER_TEMP 'SideMaster-install'
+          Start-Process -FilePath $installer.FullName -ArgumentList @('/S', "/D=$installDir") -Wait
+          $app = Join-Path $installDir 'SideMaster.exe'
+          if (-not (Test-Path $app)) { throw 'Installed app missing' }
+          $env:SIDEMASTER_APP_EXE = $app
+          $env:SIDEMASTER_PROFILE_DIR = Join-Path $env:APPDATA 'SideMaster'
+          $process = Start-Process -FilePath $app -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
+          node scripts/electron-smoke.mjs edit-close
+          Wait-Process -Id $process.Id -Timeout 30
+          npm version 1.0.1 --no-git-tag-version --ignore-scripts
+          npm ci
+          npm run dist:win
+          $upgrade = Get-ChildItem release/SideMaster-1.0.1-Setup.exe
+          if (-not $upgrade -or $upgrade.Length -eq 0) { throw 'Updated NSIS installer missing' }
+          Start-Process -FilePath $upgrade.FullName -ArgumentList @('/S', "/D=$installDir") -Wait
+          $updatedApp = Join-Path $installDir 'SideMaster.exe'
+          $updated = Start-Process -FilePath $updatedApp -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
+          node scripts/electron-smoke.mjs verify-update
+          Wait-Process -Id $updated.Id -Timeout 30
+          $portableApp = Join-Path $env:GITHUB_WORKSPACE 'release/SideMaster-1.0.1-Portable.exe'
+          if (-not (Test-Path $portableApp)) { throw 'Updated portable executable missing' }
+          $env:SIDEMASTER_APP_EXE = $portableApp
+          $portableProcess = Start-Process -FilePath $portableApp -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
+          node scripts/electron-smoke.mjs verify-update
+          Wait-Process -Id $portableProcess.Id -Timeout 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sidemaster-windows-x64
+          path: release/*.exe
