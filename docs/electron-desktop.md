@@ -8,6 +8,7 @@
 - `npm run dist:linux` gera Linux x64 em `release/SideMaster-1.0.0-x86_64.AppImage`.
 - `npm run dist:win` gera os dois pacotes Windows x64: instalador `release/SideMaster-1.0.0-Setup.exe` e executável portátil `release/SideMaster-1.0.0-Portable.exe`.
 - `npm run dist:appimage-portable` gera somente o AppImage Linux e o `.exe` Portable Windows em uma única chamada. Execute em Linux com Wine instalado; o alvo AppImage exige Linux e o build Windows cruzado no Linux usa Wine.
+- Os comandos de build usam `--publish never`: geram pacotes locais ou artefatos do CI. A publicação em Releases é uma ação separada e explícita pelo `gh`.
 - As janelas do aplicativo não exibem a barra de menus padrão do Electron.
 - Linux exige as bibliotecas compartilhadas do Electron. Para usar AppImage, a distribuição também precisa de FUSE 2 ou de executar `--appimage-extract` e abrir o AppRun extraído.
 - Gere o instalador Windows em Windows; o workflow usa `windows-2022` e verifica instalação e inicialização. Build cross-platform em Linux não conta como teste do aplicativo no Windows.

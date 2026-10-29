@@ -25,7 +25,7 @@ test('commits concurrent snapshots in revision order and ignores stale revisions
 test('failed commit preserves the prior valid file and removes incomplete temp file', async t => {
   const f = await fixture(); t.after(f.cleanup);
   await f.store.save(makeGuide('confirmed'), 1);
-  const failing = createGuideStore(f.root, { beforeRename: destination => { if (destination.endsWith('/guides/guide_test-1.json')) throw new Error('simulated disk failure'); } });
+  const failing = createGuideStore(f.root, { beforeRename: destination => { if (destination === path.join(f.root, 'guides', 'guide_test-1.json')) throw new Error('simulated disk failure'); } });
   await assert.rejects(failing.save(makeGuide('unconfirmed'), 2), /simulated disk failure/);
   const record = JSON.parse(await readFile(path.join(f.root, 'guides', 'guide_test-1.json'), 'utf8'));
   assert.equal(record.guide.title, 'confirmed');
