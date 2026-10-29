@@ -1,24 +1,64 @@
 {
-  "name": "nuxt-app",
+  "name": "sidemaster",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Editor desktop de guias de sideboard Pauper",
+  "author": "SideMaster",
+  "desktopName": "io.sidemaster.app",
+  "main": "electron/main.cjs",
+  "engines": { "node": ">=22.12.0" },
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev --host 0.0.0.0",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "start": "electron .",
+    "icons": "node scripts/generate-icons.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "dist:linux": "electron-builder --linux AppImage --x64",
+    "dist:win": "electron-builder --win --x64",
+    "dist:appimage-portable": "electron-builder --linux AppImage --win portable --x64",
+    "dist:dir": "electron-builder --dir"
   },
-  "dependencies": {
-    "@nuxt/kit": "npm:@nuxt/kit-nightly@latest",
-    "@nuxt/ui": "^2.21.0",
-    "@nuxtjs/supabase": "1.4.6",
-    "@nuxtjs/tailwindcss": "6.13.1",
-    "nuxt": "^3.15.4",
-    "vue": "latest",
-    "vue-markdown-render": "^2.2.1",
-    "vue-router": "latest"
+  "devDependencies": {
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0"
   },
-  "devDependencies": {},
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "build": {
+    "appId": "io.sidemaster.app",
+    "productName": "SideMaster",
+    "linux": {
+      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "icon": "electron/assets/sidemaster-icon.png",
+      "category": "Office",
+      "syncDesktopName": true,
+      "artifactName": "SideMaster-${version}-${arch}.${ext}"
+    },
+    "asar": true,
+    "directories": { "output": "release" },
+    "files": [
+      "electron/**",
+      "src/**",
+      "index.html",
+      "package.json",
+      "!src/app.js",
+      "!src/**/test*"
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "electron/assets/sidemaster-icon.ico",
+      "artifactName": "SideMaster-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "artifactName": "SideMaster-${version}-Setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "SideMaster-${version}-Portable.${ext}"
+    }
+  }
 }

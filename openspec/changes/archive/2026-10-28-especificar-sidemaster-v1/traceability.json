@@ -1,0 +1,3021 @@
+{
+  "source": "docs/requisitos-v1.md",
+  "sourceSha256": "4615eac93c09378f2b54806f2d23469be4c4fdb27c0ac20772ee5fb57a4033e5",
+  "change": "especificar-sidemaster-v1",
+  "requirements": [
+    {
+      "id": "SM-001",
+      "capability": "guide-storage",
+      "lines": [
+        18
+      ],
+      "title": "Uso pessoal",
+      "body": "O sistema SHALL permitir o uso pessoal da biblioteca e do editor no navegador, sem exigir conta ou serviço remoto de armazenamento de guias.",
+      "scenarios": [
+        {
+          "title": "Abrir o ambiente pessoal",
+          "when": "a pessoa abre o aplicativo pela primeira vez",
+          "then": "ela consegue criar e editar um guia sem cadastrar uma conta.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-002",
+      "capability": "guide-storage",
+      "lines": [
+        19
+      ],
+      "title": "Salvamento automático no navegador",
+      "body": "O sistema SHALL persistir automaticamente as alterações do guia no armazenamento do navegador e recuperar o conteúdo gravado ao reabrir o aplicativo.",
+      "scenarios": [
+        {
+          "title": "Recuperar uma alteração",
+          "when": "a pessoa altera um campo Markdown, aguarda a confirmação de salvamento e reabre o aplicativo",
+          "then": "o guia recuperado contém a alteração e a mesma estrutura de seções.",
+          "given": null
+        },
+        {
+          "title": "Falha ao gravar",
+          "when": "a gravação local falha durante uma edição",
+          "then": "o texto permanece disponível na sessão e o estado de salvamento informa a falha, sem afirmar que a alteração foi salva.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-003",
+      "capability": "guide-storage",
+      "lines": [
+        20
+      ],
+      "title": "Estado do salvamento e última atualização",
+      "body": "O sistema SHALL apresentar o estado da gravação do guia e a data e hora de sua última atualização confirmada, atualizando essa informação após uma gravação bem-sucedida.",
+      "scenarios": [
+        {
+          "title": "Confirmar a gravação",
+          "when": "uma edição é persistida com sucesso",
+          "then": "o indicador informa que o guia foi salvo e mostra a data e hora correspondentes.",
+          "given": null
+        },
+        {
+          "title": "Atualização ainda pendente",
+          "when": "o conteúdo muda e a gravação ainda está pendente",
+          "then": "o indicador diferencia a alteração pendente da última versão efetivamente gravada.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-004",
+      "capability": "guide-storage",
+      "lines": [
+        21
+      ],
+      "title": "Compartilhamento por arquivos de leitura",
+      "body": "O sistema SHALL disponibilizar exportações HTML e PDF do guia pessoal para compartilhamento, conforme os contratos de guide-export.",
+      "scenarios": [
+        {
+          "title": "Compartilhar um guia",
+          "when": "a pessoa escolhe exportar em HTML ou PDF",
+          "then": "ela recebe o arquivo de leitura correspondente ao guia selecionado.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-005",
+      "capability": "archetype-library",
+      "lines": [
+        25
+      ],
+      "title": "Biblioteca por arquétipo",
+      "body": "O sistema SHALL agrupar os guias pelo arquétipo do deck do autor e permitir selecionar um guia dentro do respectivo grupo.",
+      "scenarios": [
+        {
+          "title": "Selecionar em um grupo",
+          "when": "existem dois guias de Grixis Affinity e um de MonoU Terror",
+          "then": "a biblioteca apresenta os guias nos respectivos arquétipos e permite abrir cada guia.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-006",
+      "capability": "archetype-library",
+      "lines": [
+        26
+      ],
+      "title": "Versão como guia independente",
+      "body": "O sistema SHALL representar cada versão de um arquétipo como um guia completo e independente, com identificação própria; a versão de conteúdo não é uma revisão automática de edição nem a versão do formato JSON.",
+      "scenarios": [
+        {
+          "title": "Abrir duas versões",
+          "when": "a pessoa abre v1 e v2 do mesmo arquétipo",
+          "then": "cada seleção recupera um documento completo com sua própria identificação.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-007",
+      "capability": "archetype-library",
+      "lines": [
+        27
+      ],
+      "title": "Contexto de metagame da versão",
+      "body": "O sistema SHALL permitir identificar e descrever o contexto de uma versão, como nova coleção, banimento ou mudança de metagame, usando a identificação do guia e seu conteúdo editorial.",
+      "scenarios": [
+        {
+          "title": "Identificar uma atualização de metagame",
+          "when": "a pessoa cria um guia identificado como ajustes após uma nova coleção",
+          "then": "essa identificação distingue o novo guia dos anteriores na biblioteca e acompanha seu conteúdo salvo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-008",
+      "capability": "archetype-library",
+      "lines": [
+        28
+      ],
+      "title": "Conteúdo isolado entre guias",
+      "body": "O sistema SHALL manter listas, seções, matchups, variantes e mãos pertencentes ao guia selecionado, isolando as alterações em relação aos outros guias.",
+      "scenarios": [
+        {
+          "title": "Editar uma versão",
+          "when": "a pessoa altera a lista, um texto e uma mão na v2",
+          "then": "essas alterações são recuperadas na v2 e a v1 conserva seu conteúdo anterior.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-009",
+      "capability": "archetype-library",
+      "lines": [
+        29
+      ],
+      "title": "Preservação das versões anteriores",
+      "body": "O sistema SHALL preservar os guias existentes quando um novo guia do mesmo arquétipo for criado.",
+      "scenarios": [
+        {
+          "title": "Criar o próximo guia",
+          "when": "uma nova versão de Grixis Affinity é criada",
+          "then": "os guias anteriores continuam disponíveis e mantêm identificadores e conteúdo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-010",
+      "capability": "guide-editor",
+      "lines": [
+        33
+      ],
+      "title": "Editor em duas colunas",
+      "body": "O sistema SHALL apresentar a área de edição à esquerda e a prévia visual à direita no layout de trabalho com duas colunas.",
+      "scenarios": [
+        {
+          "title": "Editar com prévia visível",
+          "when": "o guia é aberto no layout de trabalho",
+          "then": "os campos de edição e o resultado visual estão disponíveis simultaneamente nas respectivas colunas.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-011",
+      "capability": "guide-editor",
+      "lines": [
+        34
+      ],
+      "title": "Sumário hierárquico recolhível",
+      "body": "O sistema SHALL oferecer, dentro da coluna de edição, um sumário hierárquico recolhível das seções, matchups e seus itens editáveis.",
+      "scenarios": [
+        {
+          "title": "Navegar na hierarquia",
+          "when": "a pessoa expande Matchups e UB Faeries no sumário",
+          "then": "ela encontra o plano geral, suas variantes e mãos cadastradas, podendo recolher a navegação.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-012",
+      "capability": "guide-editor",
+      "lines": [
+        35
+      ],
+      "title": "Uma seção selecionada por vez",
+      "body": "O sistema SHALL mostrar os campos de uma única seção ou item de matchup selecionado por vez na coluna de edição.",
+      "scenarios": [
+        {
+          "title": "Trocar a seleção",
+          "when": "a pessoa seleciona UB Faeries depois de editar Main deck",
+          "then": "os campos de UB Faeries ocupam a área de edição e o conteúdo já digitado no deck é preservado.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-013",
+      "capability": "guide-editor",
+      "lines": [
+        36
+      ],
+      "title": "Prévia do guia completo",
+      "body": "O sistema SHALL manter o documento inteiro na coluna de prévia, na ordem vigente das seções, mesmo quando apenas uma seção estiver selecionada para edição.",
+      "scenarios": [
+        {
+          "title": "Selecionar uma parte do documento",
+          "when": "a pessoa seleciona um matchup",
+          "then": "a prévia continua contendo apresentação, listas, demais matchups e encerramento do guia.",
+          "given": null
+        },
+        {
+          "title": "Atualizar um campo",
+          "when": "a pessoa altera um campo Markdown",
+          "then": "o trecho correspondente é atualizado na prévia integral.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-014",
+      "capability": "guide-editor",
+      "lines": [
+        37
+      ],
+      "title": "Navegação sincronizada à seleção",
+      "body": "O sistema SHALL rolar a prévia integral até o trecho correspondente quando a pessoa selecionar uma seção no sumário.",
+      "scenarios": [
+        {
+          "title": "Localizar o trecho selecionado",
+          "when": "a pessoa escolhe Mãos iniciais de UB Faeries no sumário",
+          "then": "a prévia posiciona o trecho desse item em uma região visível.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-015",
+      "capability": "guide-editor",
+      "lines": [
+        38
+      ],
+      "title": "Campos Markdown separados",
+      "body": "O sistema SHALL armazenar e editar as partes do guia em campos Markdown separados, preservando o conteúdo de cada campo nas trocas de seleção e na persistência.",
+      "scenarios": [
+        {
+          "title": "Editar duas partes",
+          "when": "a pessoa escreve a estratégia de um matchup e depois sua justificativa de sideboard",
+          "then": "os dois textos ficam em campos distintos e são recuperados sem concatenação ou perda.",
+          "given": null
+        },
+        {
+          "title": "Renderizar Markdown",
+          "when": "um campo contém título, lista, ênfase e link",
+          "then": "a prévia renderiza esses elementos segundo sua sintaxe.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-016",
+      "capability": "guide-editor",
+      "lines": [
+        39
+      ],
+      "title": "Modelo baseado no guia de referência",
+      "body": "O sistema SHALL oferecer um modelo inicial inspirado na organização do PPTX fornecido, usando o contrato proposto em guide-template como detalhamento editorial.",
+      "scenarios": [
+        {
+          "title": "Criar a partir do modelo",
+          "when": "a pessoa inicia um guia pelo modelo",
+          "then": "recebe a estrutura inicial de apresentação, informações sobre o deck, listas, maybeboard, matchups e encerramento editáveis.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-017",
+      "capability": "guide-editor",
+      "lines": [
+        40
+      ],
+      "title": "Personalização das seções",
+      "body": "O sistema SHALL permitir adicionar, renomear, excluir e reordenar seções do guia, refletindo as alterações no sumário, na prévia e nas exportações.",
+      "scenarios": [
+        {
+          "title": "Adicionar e renomear",
+          "when": "a pessoa adiciona uma seção e a nomeia Notas de torneio",
+          "then": "a seção fica disponível no sumário e na prévia com esse nome.",
+          "given": null
+        },
+        {
+          "title": "Excluir e reordenar",
+          "when": "a pessoa exclui uma seção e move outra para o início",
+          "then": "o documento salvo e exportado usa a nova sequência e omite a seção excluída.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-018",
+      "capability": "guide-editor",
+      "lines": [
+        41
+      ],
+      "title": "Acesso às informações e verificações",
+      "body": "O sistema SHALL integrar o painel de informações e verificações do guia ao editor, conforme guide-status-panel.",
+      "scenarios": [
+        {
+          "title": "Consultar o estado do guia",
+          "when": "a pessoa está editando uma seção",
+          "then": "ela consegue consultar o resumo e os detalhes das verificações a partir do editor.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-019",
+      "capability": "card-catalog",
+      "lines": [
+        45
+      ],
+      "title": "Dados e imagens do Scryfall",
+      "body": "O sistema SHALL consultar a API do Scryfall para resolver cartas e obter os dados necessários à visualização e à verificação de legalidade. A ausência de resposta SHALL ser distinguida de uma resposta de carta inexistente.",
+      "scenarios": [
+        {
+          "title": "Resolver uma carta",
+          "when": "o Scryfall retorna uma carta para a referência informada",
+          "then": "o aplicativo associa a carta aos dados de identidade, imagem, tipo e legalidade necessários ao guia.",
+          "given": null
+        },
+        {
+          "title": "Serviço indisponível",
+          "when": "a consulta ao catálogo não pode ser concluída",
+          "then": "a referência permanece no texto e aparece como pendente ou indisponível, sem ser afirmada como reconhecida ou inexistente.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-020",
+      "capability": "card-catalog",
+      "lines": [
+        46
+      ],
+      "title": "Entrada de nomes em inglês e português",
+      "body": "O sistema SHALL aceitar nomes de cartas em inglês e português tanto nas referências textuais quanto nas listas, resolvendo-os pelos dados do catálogo.",
+      "scenarios": [
+        {
+          "title": "Resolver os dois idiomas",
+          "when": "duas referências usam nomes inglês e português catalogados da mesma carta",
+          "then": "ambas são reconhecidas e recebem imagem e dados da carta.",
+          "given": null
+        },
+        {
+          "title": "Nome não reconhecido",
+          "when": "o catálogo confirma que o nome informado não corresponde a uma carta",
+          "then": "o nome original é preservado e o campo recebe um problema de referência.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-021",
+      "capability": "card-catalog",
+      "lines": [
+        47
+      ],
+      "title": "Identidade comum entre idiomas",
+      "body": "O sistema SHALL tratar nomes em inglês e português que correspondem à mesma carta como uma identidade única para contagens, validação e associação de referências.",
+      "scenarios": [
+        {
+          "title": "Contar nomes equivalentes",
+          "when": "uma lista contém duas cópias pelo nome inglês e duas pelo nome português da mesma carta",
+          "then": "a representação normalizada considera quatro cópias de uma identidade, mantendo os textos digitados.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-022",
+      "capability": "card-catalog",
+      "lines": [
+        48
+      ],
+      "title": "Identidade preservada na tradução",
+      "body": "O sistema SHALL manter a identidade de uma carta associada à referência mesmo quando a apresentação textual do campo mudar de idioma, conforme translation-readiness.",
+      "scenarios": [
+        {
+          "title": "Conservar a associação",
+          "when": "o texto de apresentação de uma referência bilíngue é alterado em uma transformação de idioma",
+          "then": "a referência continua associada à mesma identidade de carta, quantidade e imagem resolvida.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-023",
+      "capability": "deck-lists",
+      "lines": [
+        52
+      ],
+      "title": "Formato inicial Pauper",
+      "body": "O sistema SHALL tratar os guias da primeira versão como guias Pauper e aplicar a eles as regras desse formato descritas em guide-validation.",
+      "scenarios": [
+        {
+          "title": "Criar um guia inicial",
+          "when": "um guia é criado pelo modelo inicial",
+          "then": "o formato usado nas verificações é Pauper.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-024",
+      "capability": "deck-lists",
+      "lines": [
+        53
+      ],
+      "title": "Listas Markdown separadas",
+      "body": "O sistema SHALL fornecer campos Markdown distintos para main deck e sideboard, preservando suas linhas originais.",
+      "scenarios": [
+        {
+          "title": "Editar as duas listas",
+          "when": "a pessoa preenche o main deck e depois o sideboard",
+          "then": "cada campo conserva sua lista e a prévia distingue as duas zonas.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-025",
+      "capability": "deck-lists",
+      "lines": [
+        54
+      ],
+      "title": "Quantidade e referência por linha",
+      "body": "O sistema SHALL interpretar cada linha de carta no padrão quantidade inteira positiva seguida de referência entre colchetes, como `4 [Myr Enforcer]`, mantendo a origem da linha para apontar problemas.",
+      "scenarios": [
+        {
+          "title": "Interpretar a linha",
+          "when": "uma lista contém `4 [Myr Enforcer]`",
+          "then": "a entrada informa quantidade quatro e referência Myr Enforcer.",
+          "given": null
+        },
+        {
+          "title": "Linha incompleta",
+          "when": "uma linha de carta está sem quantidade, com quantidade não positiva ou com referência incompleta",
+          "then": "o texto permanece editável e um problema indica aquela linha, sem inventar uma quantidade válida.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-026",
+      "capability": "deck-lists",
+      "lines": [
+        55
+      ],
+      "title": "Visualização derivada das listas",
+      "body": "O sistema SHALL gerar os blocos visuais a partir das listas Markdown vigentes, segundo deck-visualization, usando a referência de composição compacta fornecida pelo usuário.",
+      "scenarios": [
+        {
+          "title": "Atualizar a representação",
+          "when": "a pessoa altera uma quantidade na lista",
+          "then": "o bloco visual passa a refletir a mesma quantidade após a interpretação do campo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-027",
+      "capability": "deck-lists",
+      "lines": [
+        56
+      ],
+      "title": "Quantidades na visualização",
+      "body": "O sistema SHALL mostrar, na visualização do deck, a quantidade correspondente à carta na zona representada.",
+      "scenarios": [
+        {
+          "title": "Ler a quantidade",
+          "when": "uma carta aparece quatro vezes no main deck normalizado",
+          "then": "a visualização do main deck mostra o indicador quatro para essa carta.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-028",
+      "capability": "deck-visualization",
+      "lines": [
+        60
+      ],
+      "title": "Main deck e sideboard separados",
+      "body": "O sistema SHALL apresentar main deck e sideboard em blocos visualmente identificados e separados.",
+      "scenarios": [
+        {
+          "title": "Carta nas duas zonas",
+          "when": "uma carta tem três cópias no main deck e uma no sideboard",
+          "then": "cada zona apresenta seu próprio bloco e a quantidade correspondente.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-029",
+      "capability": "deck-visualization",
+      "lines": [
+        61
+      ],
+      "title": "Agrupamento por tipo",
+      "body": "O sistema SHALL organizar as cartas em grupos de tipo sem duplicar a contagem de uma carta por ela ter múltiplos tipos. A convenção de grupo principal é detalhada no design.",
+      "scenarios": [
+        {
+          "title": "Agrupar artefatos com outro tipo",
+          "when": "a lista contém uma criatura artefato e um terreno artefato",
+          "then": "cada carta aparece em um único grupo principal e os totais permanecem iguais aos da lista.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-030",
+      "capability": "deck-visualization",
+      "lines": [
+        62
+      ],
+      "title": "Pilhas parcialmente sobrepostas",
+      "body": "O sistema SHALL renderizar cada grupo de cartas como uma pilha com sobreposição parcial das imagens.",
+      "scenarios": [
+        {
+          "title": "Renderizar um grupo",
+          "when": "um grupo contém três cartas distintas",
+          "then": "as três imagens formam uma pilha compacta com sobreposição parcial.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-031",
+      "capability": "deck-visualization",
+      "lines": [
+        63
+      ],
+      "title": "Nomes e quantidades visíveis",
+      "body": "O sistema SHALL manter o nome e a quantidade de cada carta visíveis na pilha compacta, sem depender de hover para ler essas informações.",
+      "scenarios": [
+        {
+          "title": "Ler a pilha sem interação",
+          "when": "a pessoa consulta um grupo compacto sem passar o mouse",
+          "then": "ela consegue identificar o nome e a quantidade de todas as cartas do grupo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-032",
+      "capability": "deck-visualization",
+      "lines": [
+        64
+      ],
+      "title": "Uma imagem por carta distinta",
+      "body": "O sistema SHALL mostrar uma imagem por identidade distinta de carta em cada zona do deck, com quantidade agregada, em vez de repetir as imagens por cópia.",
+      "scenarios": [
+        {
+          "title": "Agregar repetições",
+          "when": "a mesma identidade aparece em linhas equivalentes da lista e totaliza quatro cópias",
+          "then": "a zona exibe uma imagem com quantidade quatro.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-033",
+      "capability": "deck-visualization",
+      "lines": [
+        65
+      ],
+      "title": "Imagem completa no hover e toque",
+      "body": "O sistema SHALL permitir visualizar a imagem completa de uma carta da pilha ao passar o mouse ou tocar, oferecendo uma forma de encerrar a visualização ampliada.",
+      "scenarios": [
+        {
+          "title": "Abrir pelo mouse",
+          "when": "a pessoa passa o mouse sobre uma carta compacta",
+          "then": "a imagem completa fica visível.",
+          "given": null
+        },
+        {
+          "title": "Abrir por toque",
+          "when": "a pessoa toca na carta em um dispositivo de toque",
+          "then": "a imagem completa abre e pode ser fechada.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-034",
+      "capability": "deck-visualization",
+      "lines": [
+        66
+      ],
+      "title": "Escolha automática da imagem",
+      "body": "O sistema SHALL selecionar automaticamente uma imagem disponível da carta resolvida na primeira versão. A identidade da carta SHALL permanecer independente da edição usada pela imagem.",
+      "scenarios": [
+        {
+          "title": "Carta com várias edições",
+          "when": "a carta resolvida possui diferentes edições com imagem",
+          "then": "uma imagem é escolhida automaticamente e o guia pode ser editado e exportado sem selecionar edição ou arte.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-035",
+      "capability": "matchup-plans",
+      "lines": [
+        70
+      ],
+      "title": "Adversário identificado pelo arquétipo",
+      "body": "O sistema SHALL identificar o adversário pelo nome do arquétipo e permitir criar e manter um matchup sem cadastrar ou reproduzir uma lista adversária.",
+      "scenarios": [
+        {
+          "title": "Criar UB Faeries",
+          "when": "a pessoa informa UB Faeries como adversário",
+          "then": "o matchup pode receber estratégia, planos e mãos sem lista de cartas do oponente.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-036",
+      "capability": "matchup-plans",
+      "lines": [
+        71
+      ],
+      "title": "Plano geral do confronto",
+      "body": "O sistema SHALL manter um plano geral em cada matchup para os campos editoriais e as trocas de sideboard.",
+      "scenarios": [
+        {
+          "title": "Editar o plano geral",
+          "when": "a pessoa abre um matchup sem variantes",
+          "then": "ela consegue preencher os campos do plano geral.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-037",
+      "capability": "matchup-plans",
+      "lines": [
+        72
+      ],
+      "title": "Variantes opcionais com nomes livres",
+      "body": "O sistema SHALL permitir criar variantes opcionais e atribuir a elas nomes definidos pelo autor.",
+      "scenarios": [
+        {
+          "title": "Nomear variantes",
+          "when": "a pessoa adiciona Tradicional, Sneaky Snacker e Draw ao matchup",
+          "then": "cada variante fica identificada por seu nome e pode ser selecionada separadamente.",
+          "given": null
+        },
+        {
+          "title": "Manter apenas o plano geral",
+          "when": "o matchup não precisa de variantes",
+          "then": "ele funciona e pode ser exportado apenas com o plano geral.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-038",
+      "capability": "matchup-plans",
+      "lines": [
+        73
+      ],
+      "title": "Substituição seletiva dos campos",
+      "body": "O sistema SHALL resolver cada campo de uma variante pelo valor específico da variante quando esse valor tiver sido definido e pelo plano geral nos demais casos. Ausência de substituição e um valor explicitamente vazio SHALL ser estados distintos.",
+      "scenarios": [
+        {
+          "title": "Alterar somente a estratégia",
+          "when": "a variante define apenas a estratégia",
+          "then": "as entradas, saídas e os demais campos continuam usando o plano geral.",
+          "given": null
+        },
+        {
+          "title": "Esvaziar um campo intencionalmente",
+          "when": "o autor define um texto vazio como substituição em uma variante",
+          "then": "o resultado da variante fica vazio nesse campo e a intenção é preservada no salvamento e no JSON.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-039",
+      "capability": "matchup-plans",
+      "lines": [
+        74
+      ],
+      "title": "Atualização dos campos herdados",
+      "body": "O sistema SHALL refletir alterações do plano geral nos campos herdados pelas variantes, preservando os campos que possuem substituição própria.",
+      "scenarios": [
+        {
+          "title": "Atualizar trocas compartilhadas",
+          "when": "o autor altera as entradas do plano geral e a variante não as substitui",
+          "then": "a variante passa a usar as novas entradas.",
+          "given": null
+        },
+        {
+          "title": "Preservar uma estratégia própria",
+          "when": "o autor altera a estratégia geral e a variante tem estratégia própria",
+          "then": "a estratégia específica da variante é preservada.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-040",
+      "capability": "matchup-plans",
+      "lines": [
+        75
+      ],
+      "title": "Trocas associadas ao plano",
+      "body": "O sistema SHALL associar campos Markdown de cartas que entram e saem a cada plano e avaliar as trocas sobre o conteúdo efetivo do plano, incluindo a herança da variante.",
+      "scenarios": [
+        {
+          "title": "Validar uma variante",
+          "when": "a variante substitui as saídas e herda as entradas",
+          "then": "as verificações usam as saídas específicas e as entradas gerais, associadas àquela variante.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-041",
+      "capability": "matchup-plans",
+      "lines": [
+        76
+      ],
+      "title": "Avaliação com justificativa Markdown",
+      "body": "O sistema SHALL permitir ao autor atribuir uma avaliação qualitativa ao confronto e escrever sua justificativa em um campo Markdown separado, exibindo ambas no guia.",
+      "scenarios": [
+        {
+          "title": "Apresentar a avaliação",
+          "when": "o autor seleciona Levemente desfavorável e escreve a justificativa",
+          "then": "o guia mostra o rótulo associado ao confronto e renderiza a justificativa.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-042",
+      "capability": "matchup-plans",
+      "lines": [
+        77
+      ],
+      "title": "Escala qualitativa de sete opções",
+      "body": "O sistema SHALL oferecer exatamente as opções Muito favorável, Favorável, Levemente favorável, Equilibrado, Levemente desfavorável, Desfavorável e Muito desfavorável para a avaliação qualitativa.",
+      "scenarios": [
+        {
+          "title": "Escolher na escala",
+          "when": "o autor abre o campo de avaliação",
+          "then": "as sete opções estão disponíveis e o valor selecionado é preservado ao reabrir o guia.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-043",
+      "capability": "opening-hands",
+      "lines": [
+        81
+      ],
+      "title": "Exemplos dentro do matchup",
+      "body": "O sistema SHALL permitir cadastrar exemplos de mãos iniciais associados ao respectivo matchup.",
+      "scenarios": [
+        {
+          "title": "Manter exemplos separados",
+          "when": "o autor adiciona duas mãos a UB Faeries e uma a Jund Wildfire",
+          "then": "cada exemplo aparece no matchup ao qual foi associado.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-044",
+      "capability": "opening-hands",
+      "lines": [
+        82
+      ],
+      "title": "Um cenário por exemplo",
+      "body": "O sistema SHALL associar cada exemplo de mão a um único cenário editorial e uma única avaliação, permitindo criar outro exemplo para representar um cenário diferente.",
+      "scenarios": [
+        {
+          "title": "Avaliar a mesma mão em dois contextos",
+          "when": "o autor precisa de avaliações diferentes para play e draw",
+          "then": "ele registra dois exemplos, cada um com seu próprio cenário e decisão.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-045",
+      "capability": "opening-hands",
+      "lines": [
+        83
+      ],
+      "title": "Contexto de play e sideboard",
+      "body": "O sistema SHALL registrar em cada exemplo os dois eixos de contexto: Play ou Draw e Pré-side ou Pós-side, exibindo-os junto à mão.",
+      "scenarios": [
+        {
+          "title": "Mostrar o contexto",
+          "when": "o exemplo é marcado Draw e Pós-side",
+          "then": "a prévia e as exportações identificam esse cenário junto às cartas.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-046",
+      "capability": "opening-hands",
+      "lines": [
+        84
+      ],
+      "title": "Mão sempre com sete cartas",
+      "body": "O sistema SHALL considerar completo um exemplo de mão com exatamente sete cartas, somando as quantidades inclusive de cartas repetidas; tamanhos diferentes SHALL gerar o problema informativo descrito em guide-validation.",
+      "scenarios": [
+        {
+          "title": "Contar cartas repetidas",
+          "when": "o campo informa duas cópias de uma carta e cinco outras cartas",
+          "then": "a contagem do exemplo é sete.",
+          "given": null
+        },
+        {
+          "title": "Rascunho com seis cartas",
+          "when": "a lista de uma mão totaliza seis",
+          "then": "o exemplo permanece editável e o painel informa que falta uma carta para completar sete.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-047",
+      "capability": "opening-hands",
+      "lines": [
+        85
+      ],
+      "title": "Mulligans registrados na justificativa",
+      "body": "O sistema SHALL permitir registrar observações sobre mulligans no texto da justificativa e SHALL manter os exemplos como mãos de sete cartas, sem um campo próprio para quantidade de mulligans.",
+      "scenarios": [
+        {
+          "title": "Explicar uma condição de mulligan",
+          "when": "o autor escreve que manteria após um mulligan",
+          "then": "a observação aparece na justificativa e a lista continua representando sete cartas.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-048",
+      "capability": "opening-hands",
+      "lines": [
+        86
+      ],
+      "title": "Decisão de manter mulligar ou situacional",
+      "body": "O sistema SHALL disponibilizar exatamente Manter, Mulligar e Situacional como decisões atribuídas pelo autor a um exemplo de mão.",
+      "scenarios": [
+        {
+          "title": "Registrar uma decisão situacional",
+          "when": "o autor seleciona Situacional",
+          "then": "esse valor é preservado e exibido junto ao exemplo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-049",
+      "capability": "opening-hands",
+      "lines": [
+        87
+      ],
+      "title": "Justificativa em campo Markdown",
+      "body": "O sistema SHALL armazenar a justificativa da mão em um campo Markdown separado da lista e dos seletores de contexto e decisão.",
+      "scenarios": [
+        {
+          "title": "Explicar usando cartas",
+          "when": "a justificativa contém ênfase e uma referência a carta",
+          "then": "a prévia mantém a formatação e resolve a referência sem alterar a lista da mão.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-050",
+      "capability": "opening-hands",
+      "lines": [
+        88
+      ],
+      "title": "Lista Markdown da mão",
+      "body": "O sistema SHALL usar no campo de cartas da mão o mesmo padrão de quantidade e referência por linha definido para as listas do deck.",
+      "scenarios": [
+        {
+          "title": "Informar uma repetição",
+          "when": "a lista da mão contém `2 [Myr Enforcer]`",
+          "then": "o interpretador considera duas cópias dessa carta para a mão.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-051",
+      "capability": "opening-hands",
+      "lines": [
+        89
+      ],
+      "title": "Sete cartas exibidas individualmente",
+      "body": "O sistema SHALL mostrar uma imagem por cópia na prévia de uma mão completa, incluindo repetições, formando uma faixa visual de sete cartas.",
+      "scenarios": [
+        {
+          "title": "Renderizar duas cópias iguais",
+          "when": "uma mão válida contém duas cópias de Myr Enforcer",
+          "then": "a faixa mostra duas imagens dessa carta e sete imagens no total.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-052",
+      "capability": "guide-validation",
+      "lines": [
+        93
+      ],
+      "title": "Legalidade atual no Pauper",
+      "body": "O sistema SHALL verificar a legalidade das identidades do main deck e do sideboard no Pauper pelos dados de catálogo consultados. A raridade ou edição da imagem escolhida SHALL NOT substituir a legalidade da identidade da carta.",
+      "scenarios": [
+        {
+          "title": "Identificar uma carta banida",
+          "when": "os dados consultados indicam que uma carta da lista está banida no Pauper",
+          "then": "o painel informa o problema e sua localização na lista.",
+          "given": null
+        },
+        {
+          "title": "Imagem de edição incomum",
+          "when": "a imagem escolhida corresponde a uma edição incomum, mas a carta tem legalidade Pauper reconhecida",
+          "then": "a edição da imagem não torna a carta irregular.",
+          "given": null
+        },
+        {
+          "title": "Consulta incompleta",
+          "when": "a legalidade de alguma referência ainda não pôde ser obtida",
+          "then": "o resultado distingue a pendência e não declara a lista integralmente validada.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-053",
+      "capability": "guide-validation",
+      "lines": [
+        94
+      ],
+      "title": "Contagens do formato",
+      "body": "O sistema SHALL contar main deck e sideboard separadamente e verificar o mínimo de 60 cartas no main deck, o máximo de 15 no sideboard e o limite usual de quatro cópias combinadas por identidade segundo as regras do Pauper, respeitando terrenos básicos e exceções de regras da carta.",
+      "scenarios": [
+        {
+          "title": "Deck com mais de sessenta cartas",
+          "when": "o main deck tem 61 cartas e o sideboard tem 14, com cópias permitidas",
+          "then": "a verificação de tamanho não aponta erro por diferir de 60 e 15.",
+          "given": null
+        },
+        {
+          "title": "Limites de zona excedidos",
+          "when": "o main deck tem 59 cartas ou o sideboard tem 16",
+          "then": "o painel indica a zona e a contagem irregular.",
+          "given": null
+        },
+        {
+          "title": "Limite de cópias combinado",
+          "when": "uma carta sem exceção tem quatro cópias no main deck e uma no sideboard",
+          "then": "o painel informa cinco cópias combinadas para essa identidade.",
+          "given": null
+        },
+        {
+          "title": "Terrenos básicos",
+          "when": "a lista possui mais de quatro cópias de um terreno básico",
+          "then": "a regra de limite comum de cópias não é aplicada ao terreno básico.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-054",
+      "capability": "guide-validation",
+      "lines": [
+        95
+      ],
+      "title": "Estado das referências de cartas",
+      "body": "O sistema SHALL informar referências reconhecidas, não reconhecidas ou ainda pendentes nos campos do guia, indicando a origem do problema sem remover o texto informado.",
+      "scenarios": [
+        {
+          "title": "Apontar uma referência desconhecida",
+          "when": "uma justificativa contém uma referência que o catálogo confirmou como inexistente",
+          "then": "o problema aponta para o campo e preserva o texto.",
+          "given": null
+        },
+        {
+          "title": "Erro de rede",
+          "when": "a resolução falha por indisponibilidade de rede",
+          "then": "o estado é pendente ou indisponível, distinto de nome inexistente.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-055",
+      "capability": "guide-validation",
+      "lines": [
+        96
+      ],
+      "title": "Coerência do plano com a lista base",
+      "body": "O sistema SHALL verificar cada plano de sideboard em relação ao main deck e sideboard do próprio guia, calculando a lista resultante a partir das entradas e saídas efetivas do plano.",
+      "scenarios": [
+        {
+          "title": "Aplicar trocas válidas",
+          "when": "um plano troca duas cartas disponíveis do sideboard por duas disponíveis no main deck",
+          "then": "as zonas resultantes refletem as trocas e a validação permanece associada a esse plano.",
+          "given": null
+        },
+        {
+          "title": "Reavaliar após editar a lista base",
+          "when": "a pessoa remove do sideboard uma carta usada em um plano",
+          "then": "o plano passa a exibir a inconsistência correspondente.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-056",
+      "capability": "guide-validation",
+      "lines": [
+        97
+      ],
+      "title": "Disponibilidade de cartas nas trocas",
+      "body": "O sistema SHALL comparar as quantidades que entram com o sideboard base e as quantidades que saem com o main deck base, usando identidade comum entre idiomas e apontando insuficiências por carta.",
+      "scenarios": [
+        {
+          "title": "Retirar mais cópias do que existem",
+          "when": "um plano retira três cópias de uma carta com apenas duas no main deck",
+          "then": "o painel indica que a retirada excede a disponibilidade em uma cópia.",
+          "given": null
+        },
+        {
+          "title": "Entrar com carta ausente",
+          "when": "um plano inclui uma carta que não consta no sideboard base",
+          "then": "o painel informa a ausência dessa carta no sideboard.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-057",
+      "capability": "guide-validation",
+      "lines": [
+        98
+      ],
+      "title": "Diferença entre entradas e saídas",
+      "body": "O sistema SHALL comparar a soma das entradas e das saídas de cada plano e informar a diferença quando os valores divergirem, preservando o caráter informativo da verificação.",
+      "scenarios": [
+        {
+          "title": "Troca com totais diferentes",
+          "when": "um plano contém cinco entradas e quatro saídas",
+          "then": "o painel mostra os dois totais e a diferença de uma carta, sem bloquear edição ou exportação.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-058",
+      "capability": "guide-validation",
+      "lines": [
+        99
+      ],
+      "title": "Contagem das mãos",
+      "body": "O sistema SHALL verificar a soma das cartas de cada exemplo de mão e apontar valores diferentes de sete no respectivo exemplo.",
+      "scenarios": [
+        {
+          "title": "Exemplo com oito cartas",
+          "when": "uma mão soma oito cópias",
+          "then": "o problema informa o total oito e a expectativa sete e identifica o exemplo.",
+          "given": null
+        },
+        {
+          "title": "Corrigir uma mão",
+          "when": "uma mão irregular é editada e passa a somar sete",
+          "then": "o problema de contagem desse exemplo é removido.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-059",
+      "capability": "guide-status-panel",
+      "lines": [
+        103
+      ],
+      "title": "Resumo acima das colunas",
+      "body": "O sistema SHALL mostrar um resumo compacto das informações e verificações acima das duas colunas do editor.",
+      "scenarios": [
+        {
+          "title": "Consultar o resumo",
+          "when": "a pessoa abre o editor com listas preenchidas e problemas conhecidos",
+          "then": "o resumo aparece acima das colunas e permite perceber os totais e a existência de problemas.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-060",
+      "capability": "guide-status-panel",
+      "lines": [
+        104
+      ],
+      "title": "Detalhes expansíveis",
+      "body": "O sistema SHALL permitir expandir e recolher os detalhes do painel sem trocar a seção em edição nem descartar alterações.",
+      "scenarios": [
+        {
+          "title": "Expandir os resultados",
+          "when": "a pessoa expande o resumo",
+          "then": "os detalhes das informações e verificações ficam disponíveis.",
+          "given": null
+        },
+        {
+          "title": "Recolher os resultados",
+          "when": "a pessoa recolhe os detalhes",
+          "then": "o resumo permanece visível e a edição é preservada.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-061",
+      "capability": "guide-status-panel",
+      "lines": [
+        105
+      ],
+      "title": "Problemas associados a campos",
+      "body": "O sistema SHALL identificar cada problema com sua mensagem e localização no guia, oferecendo acesso ao campo correspondente mesmo quando ele estiver em outra seção.",
+      "scenarios": [
+        {
+          "title": "Ir para uma linha irregular",
+          "when": "a pessoa seleciona no painel um problema em uma linha do sideboard",
+          "then": "o editor abre a seção e localiza o campo ou a linha para correção.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-062",
+      "capability": "guide-status-panel",
+      "lines": [
+        106
+      ],
+      "title": "Salvamento disponível com problemas",
+      "body": "O sistema SHALL manter o salvamento automático disponível quando houver problemas de conteúdo ou validação no guia.",
+      "scenarios": [
+        {
+          "title": "Salvar um rascunho incompleto",
+          "when": "uma mão contém seis cartas e o main deck ainda está incompleto",
+          "then": "a edição pode ser gravada e recuperada com os respectivos problemas de conteúdo.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-063",
+      "capability": "guide-status-panel",
+      "lines": [
+        107
+      ],
+      "title": "Exportações disponíveis com problemas",
+      "body": "O sistema SHALL manter HTML e PDF disponíveis quando existirem problemas de conteúdo, incluindo cartas não reconhecidas, sem bloquear a exportação pela validação editorial.",
+      "scenarios": [
+        {
+          "title": "Exportar com referência desconhecida",
+          "when": "a pessoa exporta um guia com referência não resolvida",
+          "then": "a exportação pode ser concluída mantendo o nome legível no documento.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-064",
+      "capability": "guide-status-panel",
+      "lines": [
+        108
+      ],
+      "title": "Validação informativa",
+      "body": "O sistema SHALL usar as validações para informar e orientar correções, preservando os fluxos de edição, salvamento e exportação.",
+      "scenarios": [
+        {
+          "title": "Continuar o trabalho",
+          "when": "o painel informa inconsistências em um plano de sideboard",
+          "then": "a pessoa consegue trocar de seção, continuar escrevendo, salvar e solicitar exportação.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-065",
+      "capability": "guide-export",
+      "lines": [
+        112
+      ],
+      "title": "Guia web de leitura contínua",
+      "body": "O sistema SHALL renderizar o guia web como um documento contínuo na ordem das seções, com os dados de listas, planos e mãos associados ao guia.",
+      "scenarios": [
+        {
+          "title": "Ler todo o guia",
+          "when": "o documento é aberto no modo de leitura",
+          "then": "é possível percorrer as seções em sequência, incluindo aquelas que não estavam selecionadas no editor.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-066",
+      "capability": "guide-export",
+      "lines": [
+        113
+      ],
+      "title": "HTML com imagens remotas",
+      "body": "O sistema SHALL exportar um arquivo HTML com texto e estilos incorporados e imagens de cartas referenciadas por URLs remotas. Os comportamentos de hover e toque SHALL funcionar no arquivo por recursos nele incorporados, sem depender do aplicativo de edição.",
+      "scenarios": [
+        {
+          "title": "Abrir o arquivo exportado",
+          "when": "o HTML é aberto em outro navegador com acesso às imagens",
+          "then": "o texto, a diagramação, as pilhas e as interações de cartas são reproduzidos a partir do arquivo.",
+          "given": null
+        },
+        {
+          "title": "Ler sem carregar imagens",
+          "when": "o arquivo é aberto sem conseguir acessar as URLs de imagens",
+          "then": "o texto e os estilos continuam disponíveis, com nomes e quantidades legíveis como alternativa às imagens.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-067",
+      "capability": "guide-export",
+      "lines": [
+        114
+      ],
+      "title": "PDF A4 com paginação automática",
+      "body": "O sistema SHALL exportar um PDF em páginas A4, com fluxo contínuo e quebras automáticas, preservando conteúdo, ordem das seções e legibilidade dos blocos visuais.",
+      "scenarios": [
+        {
+          "title": "Paginar um guia extenso",
+          "when": "um guia ultrapassa uma página A4 e contém pilhas, tabelas e mãos",
+          "then": "o PDF distribui o conteúdo por páginas A4 e conserva nomes, quantidades, imagens e textos sem cortes que os tornem ilegíveis.",
+          "given": null
+        },
+        {
+          "title": "Leitura das cartas no PDF",
+          "when": "o guia contém referências de texto e imagens explícitas",
+          "then": "os nomes ficam legíveis e as imagens explícitas são incorporadas ao PDF, conforme card-markdown.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-068",
+      "capability": "guide-export",
+      "lines": [
+        115
+      ],
+      "title": "Cópia editável JSON completa",
+      "body": "O sistema SHALL exportar e importar um arquivo JSON que preserve os campos Markdown e a estrutura completa do guia, incluindo suas listas, identidade, seções, ordem, matchups, variantes, substituições de campos e mãos.",
+      "scenarios": [
+        {
+          "title": "Exportar e reimportar",
+          "when": "um guia com seções personalizadas, variantes e mãos é exportado e importado em um ambiente vazio",
+          "then": "o guia recuperado mantém todos os dados e o conteúdo Markdown originais.",
+          "given": null
+        },
+        {
+          "title": "Distinguir herança de vazio",
+          "when": "uma variante contém um campo herdado e outro substituído por texto vazio",
+          "then": "o JSON preserva a diferença e a prévia após importação reproduz os dois comportamentos.",
+          "given": null
+        },
+        {
+          "title": "Arquivo inválido",
+          "when": "a importação recebe JSON inválido ou estrutura incompatível",
+          "then": "o aplicativo informa o problema e preserva os guias já existentes.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-069",
+      "capability": "guide-export",
+      "lines": [
+        116
+      ],
+      "title": "Portabilidade do arquétipo e da versão",
+      "body": "O sistema SHALL permitir continuar a edição após importar o JSON em outro navegador ou computador, conservando a identificação da versão e sua associação ao arquétipo.",
+      "scenarios": [
+        {
+          "title": "Transferir o guia",
+          "when": "o arquivo exportado é importado em outro navegador",
+          "then": "o guia aparece no arquétipo correspondente, com sua identificação de versão e campos editáveis.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-070",
+      "capability": "translation-readiness",
+      "lines": [
+        120
+      ],
+      "title": "Tradução por LLM em fase posterior",
+      "body": "O sistema SHALL reservar a execução de tradução por LLM para uma etapa posterior e manter os fluxos da v1 utilizáveis sem provedor, credenciais ou execução de tradução. Esta capacidade especifica preparação dos dados.",
+      "scenarios": [
+        {
+          "title": "Usar a primeira versão",
+          "when": "a pessoa cria, edita, salva e exporta um guia na v1",
+          "then": "esses fluxos funcionam sem configurar nem executar uma LLM.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-071",
+      "capability": "translation-readiness",
+      "lines": [
+        121
+      ],
+      "title": "Conteúdo endereçável por campo",
+      "body": "O sistema SHALL preservar campos Markdown separados e identificáveis por guia e seção, permitindo que uma integração futura enderece uma parte do documento para tradução.",
+      "scenarios": [
+        {
+          "title": "Identificar uma parte traduzível",
+          "when": "o guia possui apresentação e justificativas de diferentes matchups",
+          "then": "cada campo pode ser identificado separadamente sem extrair o texto de um HTML ou PDF renderizado.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-072",
+      "capability": "translation-readiness",
+      "lines": [
+        122
+      ],
+      "title": "Preservação dos elementos estruturados",
+      "body": "O sistema SHALL representar referências de cartas, quantidades e comandos de formatação de forma que uma futura transformação de idioma preserve seus vínculos e estrutura. O contrato de tradução SHALL exigir essa preservação.",
+      "scenarios": [
+        {
+          "title": "Definir o contrato de transformação",
+          "when": "um campo contém uma referência, uma imagem explícita, uma quantidade e formatação Markdown",
+          "then": "a representação estruturada identifica esses elementos e permite comparar a preservação antes e depois de uma futura transformação de idioma.",
+          "given": null
+        }
+      ],
+      "kind": "confirmado"
+    },
+    {
+      "id": "SM-073",
+      "capability": "card-markdown",
+      "lines": [
+        130
+      ],
+      "title": "Referência textual com imagem de apoio",
+      "body": "No detalhamento proposto, o sistema SHALL interpretar `[Myr Enforcer]` em texto corrido como referência à carta, renderizando seu nome destacado e uma imagem no hover ou toque.",
+      "scenarios": [
+        {
+          "title": "Referenciar em um parágrafo",
+          "when": "o campo contém `Use [Myr Enforcer] para pressionar.`",
+          "then": "a prévia mantém a frase com o nome destacado e permite consultar a imagem da carta.",
+          "given": null
+        }
+      ],
+      "kind": "detalhamento proposto"
+    },
+    {
+      "id": "SM-074",
+      "capability": "card-markdown",
+      "lines": [
+        131
+      ],
+      "title": "Modificador de imagem explícita",
+      "body": "No detalhamento proposto, o sistema SHALL interpretar `![Myr Enforcer]`, sem URL, como imagem direta da carta no documento.",
+      "scenarios": [
+        {
+          "title": "Inserir a imagem",
+          "when": "o campo contém `![Myr Enforcer]`",
+          "then": "a imagem da carta aparece diretamente na prévia e nas exportações compatíveis.",
+          "given": null
+        }
+      ],
+      "kind": "detalhamento proposto"
+    },
+    {
+      "id": "SM-075",
+      "capability": "card-markdown",
+      "lines": [
+        132
+      ],
+      "title": "Referência com quantidade no contexto de lista",
+      "body": "No detalhamento proposto, o sistema SHALL interpretar `4 [Myr Enforcer]` como quantidade e carta quando estiver em um campo de lista de deck, sideboard, trocas ou mãos, usando a apresentação própria desse contexto.",
+      "scenarios": [
+        {
+          "title": "Usar a mesma sintaxe em contextos distintos",
+          "when": "o deck contém `4 [Myr Enforcer]` e uma mão contém `2 [Myr Enforcer]`",
+          "then": "o deck agrega quatro na imagem única e a mão mostra duas imagens individuais dessa identidade.",
+          "given": null
+        }
+      ],
+      "kind": "detalhamento proposto"
+    },
+    {
+      "id": "SM-076",
+      "capability": "card-markdown",
+      "lines": [
+        134
+      ],
+      "title": "Compatibilidade com Markdown comum",
+      "body": "No detalhamento proposto, o sistema SHALL preservar links e imagens Markdown comuns como `[texto](url)` e `![descrição](url)`, distinguindo-os das referências de cartas sem URL e respeitando referências de link explicitamente definidas no próprio Markdown.",
+      "scenarios": [
+        {
+          "title": "Link e imagem comuns",
+          "when": "o campo contém um link com URL e uma imagem com URL",
+          "then": "os dois são renderizados como Markdown comum e não geram consultas de cartas pelo texto dos rótulos.",
+          "given": null
+        },
+        {
+          "title": "Definição explícita de link",
+          "when": "o Markdown define `[referência]: https://example.org` e usa `[referência]`",
+          "then": "o link explicitamente definido é respeitado como link comum.",
+          "given": null
+        }
+      ],
+      "kind": "detalhamento proposto"
+    },
+    {
+      "id": "SM-077",
+      "capability": "card-markdown",
+      "lines": [
+        136
+      ],
+      "title": "Referências legíveis no PDF",
+      "body": "No detalhamento proposto, o sistema SHALL manter as referências textuais de cartas legíveis no PDF e incorporar as imagens solicitadas pelo modificador explícito; a leitura dessas informações SHALL ser independente de hover.",
+      "scenarios": [
+        {
+          "title": "Exportar texto e imagem",
+          "when": "um guia contém `[Myr Enforcer]` em um parágrafo e `![Myr Enforcer]` em outro bloco",
+          "then": "o PDF apresenta o nome no parágrafo e a imagem explícita no bloco correspondente.",
+          "given": null
+        }
+      ],
+      "kind": "detalhamento proposto"
+    },
+    {
+      "id": "SM-078",
+      "capability": "guide-template",
+      "lines": [
+        142
+      ],
+      "title": "Informações do guia",
+      "body": "No modelo proposto, o sistema SHALL fornecer campos para título, autoria, identificação da versão e data de referência. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor preenche título, autoria, versão e data",
+          "then": "os quatro valores permanecem associados ao guia e são recuperados ao reabri-lo",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-079",
+      "capability": "guide-template",
+      "lines": [
+        143
+      ],
+      "title": "Apresentação do autor",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção Markdown para apresentação do autor. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor escreve sua apresentação",
+          "then": "a seção é editável e aparece na posição correspondente do guia",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-080",
+      "capability": "guide-template",
+      "lines": [
+        144
+      ],
+      "title": "Sobre o deck",
+      "body": "No modelo proposto, o sistema SHALL fornecer campos Markdown para plano de jogo, mulligan e adaptação ao metagame. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor preenche os três assuntos",
+          "then": "cada assunto pode ser editado e exibido dentro de Sobre o deck",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-081",
+      "capability": "guide-template",
+      "lines": [
+        145
+      ],
+      "title": "Main deck no modelo",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção de main deck ligada à lista e à sua visualização. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o main deck é preenchido",
+          "then": "a seção usa o conteúdo e o bloco visual definidos em deck-lists e deck-visualization",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-082",
+      "capability": "guide-template",
+      "lines": [
+        146
+      ],
+      "title": "Sideboard no modelo",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção de sideboard ligada à lista e à sua visualização. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o sideboard é preenchido",
+          "then": "a seção usa sua própria lista e o respectivo bloco visual",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-083",
+      "capability": "guide-template",
+      "lines": [
+        147
+      ],
+      "title": "Escolhas de cartas e base de mana",
+      "body": "No modelo proposto, o sistema SHALL fornecer campos Markdown para escolhas de cartas e base de mana. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor documenta por que usa uma carta e como compôs os terrenos",
+          "then": "os textos e referências podem ser lidos na seção correspondente",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-084",
+      "capability": "guide-template",
+      "lines": [
+        148
+      ],
+      "title": "Maybeboard",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção Markdown para cartas e alternativas consideradas pelo autor. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor escreve uma referência e sua justificativa no Maybeboard",
+          "then": "a seção renderiza o texto e a referência sem adicionar a carta às contagens do deck base",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-085",
+      "capability": "guide-template",
+      "lines": [
+        149
+      ],
+      "title": "Matchups no modelo",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção de matchups com plano geral e variantes opcionais. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor adiciona um matchup ao modelo",
+          "then": "ele recebe a estrutura definida em matchup-plans e pode adicionar variantes",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-086",
+      "capability": "guide-template",
+      "lines": [
+        150
+      ],
+      "title": "Encerramento e redes sociais",
+      "body": "No modelo proposto, o sistema SHALL fornecer uma seção Markdown de encerramento e redes sociais. Essas seções SHALL permanecer personalizáveis conforme guide-editor.",
+      "scenarios": [
+        {
+          "title": "Preencher o modelo",
+          "when": "o autor escreve uma mensagem final e seus links",
+          "then": "o encerramento aparece com os links como conteúdo Markdown editável",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-087",
+      "capability": "guide-template",
+      "lines": [
+        156
+      ],
+      "title": "Justificativa das trocas",
+      "body": "No modelo proposto, o sistema SHALL oferecer um campo Markdown para justificar as entradas e saídas do sideboard, separado das listas de troca.",
+      "scenarios": [
+        {
+          "title": "Explicar o sideboard",
+          "when": "o autor escreve o motivo das trocas",
+          "then": "o texto aparece associado ao plano sem ser interpretado como uma lista de cartas.",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-088",
+      "capability": "guide-template",
+      "lines": [
+        157
+      ],
+      "title": "Estratégia do matchup",
+      "body": "No modelo proposto, o sistema SHALL oferecer um campo Markdown próprio para o plano de jogo do matchup.",
+      "scenarios": [
+        {
+          "title": "Explicar a postura",
+          "when": "o autor descreve quando pressionar e quando controlar",
+          "then": "a estratégia é salva separadamente e renderizada no plano correspondente.",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-089",
+      "capability": "guide-template",
+      "lines": [
+        158
+      ],
+      "title": "Interações e cuidados técnicos",
+      "body": "No modelo proposto, o sistema SHALL oferecer um campo Markdown para interações e cuidados técnicos com referências a cartas.",
+      "scenarios": [
+        {
+          "title": "Registrar uma interação",
+          "when": "o autor explica uma interação entre cartas nesse campo",
+          "then": "o texto renderizado e as referências ficam associados ao confronto.",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    },
+    {
+      "id": "SM-090",
+      "capability": "guide-template",
+      "lines": [
+        159
+      ],
+      "title": "Ajustes sugeridos no confronto",
+      "body": "No modelo proposto, o sistema SHALL oferecer um campo Markdown para ajustes sugeridos, mantendo a avaliação e sua justificativa segundo matchup-plans.",
+      "scenarios": [
+        {
+          "title": "Sugerir uma alteração futura",
+          "when": "o autor recomenda mais uma carta para um metagame específico",
+          "then": "a sugestão aparece como conteúdo editorial e não altera automaticamente a lista base.",
+          "given": null
+        }
+      ],
+      "kind": "modelo proposto"
+    }
+  ],
+  "sourceItems": [
+    {
+      "line": 7,
+      "text": "Criar e editar guias de decks Pauper em campos Markdown separados, com prévia visual, imagens de cartas obtidas pelo Scryfall e exportação para HTML e PDF.",
+      "section": "Objetivo",
+      "kind": "objetivo ou referencia",
+      "requirements": [
+        "SM-001",
+        "SM-002",
+        "SM-010",
+        "SM-015",
+        "SM-019",
+        "SM-023",
+        "SM-066",
+        "SM-067"
+      ]
+    },
+    {
+      "line": 11,
+      "text": "`sources/V.4 PT BR Side Guide Grixis Affinity .pptx`.",
+      "section": "Objetivo",
+      "kind": "objetivo ou referencia",
+      "requirements": [
+        "SM-016",
+        "SM-078",
+        "SM-079",
+        "SM-080",
+        "SM-081",
+        "SM-082",
+        "SM-083",
+        "SM-084",
+        "SM-085",
+        "SM-086"
+      ]
+    },
+    {
+      "line": 12,
+      "text": "Visualização de deck: https://www.mtggoldfish.com/deck/visual/7987742.",
+      "section": "Objetivo",
+      "kind": "objetivo ou referencia",
+      "requirements": [
+        "SM-026",
+        "SM-028",
+        "SM-029",
+        "SM-030",
+        "SM-031",
+        "SM-032",
+        "SM-033"
+      ]
+    },
+    {
+      "line": 18,
+      "text": "A primeira versão será de uso pessoal.",
+      "section": "Uso e persistência",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-001"
+      ]
+    },
+    {
+      "line": 19,
+      "text": "Os guias serão salvos automaticamente no navegador durante a edição.",
+      "section": "Uso e persistência",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-002"
+      ]
+    },
+    {
+      "line": 20,
+      "text": "Mostrar o estado do salvamento e a última atualização do guia.",
+      "section": "Uso e persistência",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-003"
+      ]
+    },
+    {
+      "line": 21,
+      "text": "O usuário compartilhará os guias por exportação para HTML ou PDF.",
+      "section": "Uso e persistência",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-004"
+      ]
+    },
+    {
+      "line": 25,
+      "text": "Agrupar os guias em uma biblioteca por arquétipo, como Grixis Affinity.",
+      "section": "Organização por arquétipo e versões",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-005"
+      ]
+    },
+    {
+      "line": 26,
+      "text": "Cada versão corresponde a um guia completo e independente daquele arquétipo.",
+      "section": "Organização por arquétipo e versões",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-006"
+      ]
+    },
+    {
+      "line": 27,
+      "text": "As versões representam configurações e orientações para diferentes momentos, como o lançamento de uma coleção, um banimento ou uma mudança do metagame.",
+      "section": "Organização por arquétipo e versões",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-007"
+      ]
+    },
+    {
+      "line": 28,
+      "text": "Cada guia tem suas próprias listas, seções, matchups, variantes e exemplos de mãos iniciais.",
+      "section": "Organização por arquétipo e versões",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-008"
+      ]
+    },
+    {
+      "line": 29,
+      "text": "Preservar os guias das versões anteriores ao criar um novo guia para o mesmo arquétipo.",
+      "section": "Organização por arquétipo e versões",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-009"
+      ]
+    },
+    {
+      "line": 33,
+      "text": "Duas colunas: edição à esquerda e resultado visual à direita.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-010"
+      ]
+    },
+    {
+      "line": 34,
+      "text": "Navegação por um sumário hierárquico recolhível dentro da coluna de edição.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-011"
+      ]
+    },
+    {
+      "line": 35,
+      "text": "Editar uma seção ou matchup selecionado por vez.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-012"
+      ]
+    },
+    {
+      "line": 36,
+      "text": "A coluna de prévia mostra sempre o guia completo.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-013"
+      ]
+    },
+    {
+      "line": 37,
+      "text": "Ao selecionar uma seção no sumário, rolar a prévia até a seção correspondente.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-014"
+      ]
+    },
+    {
+      "line": 38,
+      "text": "Campos separados em Markdown para as partes do guia.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-015"
+      ]
+    },
+    {
+      "line": 39,
+      "text": "Modelo inicial inspirado no PPTX de referência.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-016"
+      ]
+    },
+    {
+      "line": 40,
+      "text": "Possibilidade de adicionar, renomear, excluir e reordenar seções.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-017"
+      ]
+    },
+    {
+      "line": 41,
+      "text": "Painel com informações e verificações do guia e do deck.",
+      "section": "Editor",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-018"
+      ]
+    },
+    {
+      "line": 45,
+      "text": "Integração com o Scryfall para reconhecer cartas, obter imagens e consultar dados necessários à validação.",
+      "section": "Cartas e Scryfall",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-019"
+      ]
+    },
+    {
+      "line": 46,
+      "text": "Aceitar nomes em inglês e português nas referências.",
+      "section": "Cartas e Scryfall",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-020"
+      ]
+    },
+    {
+      "line": 47,
+      "text": "Reconhecer os dois nomes como referências à mesma carta.",
+      "section": "Cartas e Scryfall",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-021"
+      ]
+    },
+    {
+      "line": 48,
+      "text": "Preservar a identidade das cartas quando houver tradução do conteúdo.",
+      "section": "Cartas e Scryfall",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-022"
+      ]
+    },
+    {
+      "line": 52,
+      "text": "Suporte inicial ao formato Pauper.",
+      "section": "Deck e sideboard",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-023"
+      ]
+    },
+    {
+      "line": 53,
+      "text": "Main deck e sideboard inseridos como listas em campos Markdown.",
+      "section": "Deck e sideboard",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-024"
+      ]
+    },
+    {
+      "line": 54,
+      "text": "Cada linha informa quantidade e nome da carta, como `4 [Myr Enforcer]`.",
+      "section": "Deck e sideboard",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-025"
+      ]
+    },
+    {
+      "line": 55,
+      "text": "Gerar uma versão visual do deck a partir das listas, seguindo a referência do MTGGoldfish.",
+      "section": "Deck e sideboard",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-026"
+      ]
+    },
+    {
+      "line": 56,
+      "text": "Mostrar as quantidades das cartas na visualização.",
+      "section": "Deck e sideboard",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-027"
+      ]
+    },
+    {
+      "line": 60,
+      "text": "Mostrar main deck e sideboard separadamente.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-028"
+      ]
+    },
+    {
+      "line": 61,
+      "text": "Agrupar as cartas por tipo, como criaturas, mágicas e terrenos.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-029"
+      ]
+    },
+    {
+      "line": 62,
+      "text": "Apresentar cada grupo como uma pilha de cartas parcialmente sobrepostas.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-030"
+      ]
+    },
+    {
+      "line": 63,
+      "text": "Manter nomes e quantidades visíveis nas pilhas.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-031"
+      ]
+    },
+    {
+      "line": 64,
+      "text": "Mostrar uma imagem por carta distinta, com um indicador da quantidade de cópias.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-032"
+      ]
+    },
+    {
+      "line": 65,
+      "text": "Exibir a imagem completa ao passar o mouse ou tocar na carta.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-033"
+      ]
+    },
+    {
+      "line": 66,
+      "text": "Escolher automaticamente a imagem de cada carta na primeira versão.",
+      "section": "Visualização do deck",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-034"
+      ]
+    },
+    {
+      "line": 70,
+      "text": "Identificar o adversário pelo nome do arquétipo, sem exigir cadastro ou reprodução da lista adversária.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-035"
+      ]
+    },
+    {
+      "line": 71,
+      "text": "Cada matchup terá um plano geral.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-036"
+      ]
+    },
+    {
+      "line": 72,
+      "text": "Permitir variantes opcionais com nomes livres, como Tradicional, Sneaky Snacker, Play ou Draw.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-037"
+      ]
+    },
+    {
+      "line": 73,
+      "text": "As variantes usarão os campos do plano geral, com alterações específicas apenas nos campos que forem substituídos na variante.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-038"
+      ]
+    },
+    {
+      "line": 74,
+      "text": "Mudanças no plano geral serão refletidas nos campos que a variante continuar usando desse plano.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-039"
+      ]
+    },
+    {
+      "line": 75,
+      "text": "Associar as entradas e saídas do sideboard aos respectivos planos para permitir verificações de consistência.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-040"
+      ]
+    },
+    {
+      "line": 76,
+      "text": "Registrar a avaliação do confronto em uma escala qualitativa, com justificativa em Markdown.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-041"
+      ]
+    },
+    {
+      "line": 77,
+      "text": "A escala terá sete opções: Muito favorável, Favorável, Levemente favorável, Equilibrado, Levemente desfavorável, Desfavorável e Muito desfavorável.",
+      "section": "Matchups",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-042"
+      ]
+    },
+    {
+      "line": 81,
+      "text": "Permitir exemplos de mãos iniciais dentro de cada matchup.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-043"
+      ]
+    },
+    {
+      "line": 82,
+      "text": "Cada exemplo representa um único cenário.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-044"
+      ]
+    },
+    {
+      "line": 83,
+      "text": "Registrar se o exemplo é no play ou na draw e se é pré-side ou pós-side.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-045"
+      ]
+    },
+    {
+      "line": 84,
+      "text": "Cada mão contém sempre sete cartas, contando as cópias repetidas individualmente.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-046"
+      ]
+    },
+    {
+      "line": 85,
+      "text": "Informações sobre mulligans ficam exclusivamente na justificativa, sem um campo próprio para a quantidade de mulligans.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-047"
+      ]
+    },
+    {
+      "line": 86,
+      "text": "A decisão do autor será uma das opções: Manter, Mulligar ou Situacional.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-048"
+      ]
+    },
+    {
+      "line": 87,
+      "text": "A justificativa será escrita em um campo Markdown separado.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-049"
+      ]
+    },
+    {
+      "line": 88,
+      "text": "A lista de cartas será escrita em Markdown, com o mesmo padrão de quantidade e referência usado nas listas do deck.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-050"
+      ]
+    },
+    {
+      "line": 89,
+      "text": "A prévia mostrará as sete cartas individualmente, incluindo as cópias repetidas.",
+      "section": "Mãos iniciais",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-051"
+      ]
+    },
+    {
+      "line": 93,
+      "text": "Legalidade das cartas no Pauper.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-052"
+      ]
+    },
+    {
+      "line": 94,
+      "text": "Quantidades do main deck e do sideboard.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-053"
+      ]
+    },
+    {
+      "line": 95,
+      "text": "Referências a cartas reconhecidas ou não reconhecidas.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-054"
+      ]
+    },
+    {
+      "line": 96,
+      "text": "Coerência das trocas de sideboard em relação à lista base.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-055"
+      ]
+    },
+    {
+      "line": 97,
+      "text": "Disponibilidade das quantidades indicadas nas entradas e saídas.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-056"
+      ]
+    },
+    {
+      "line": 98,
+      "text": "Diferenças entre os totais de cartas que entram e saem.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-057"
+      ]
+    },
+    {
+      "line": 99,
+      "text": "Contagem de sete cartas em cada exemplo de mão inicial.",
+      "section": "Verificações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-058"
+      ]
+    },
+    {
+      "line": 103,
+      "text": "Exibir um resumo compacto acima das duas colunas do editor.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-059"
+      ]
+    },
+    {
+      "line": 104,
+      "text": "Permitir expandir o resumo para consultar informações e detalhes das validações.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-060"
+      ]
+    },
+    {
+      "line": 105,
+      "text": "Mostrar os problemas encontrados e indicar o campo correspondente para correção.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-061"
+      ]
+    },
+    {
+      "line": 106,
+      "text": "Manter o salvamento disponível mesmo quando houver problemas.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-062"
+      ]
+    },
+    {
+      "line": 107,
+      "text": "Manter as exportações HTML e PDF disponíveis mesmo quando houver problemas.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-063"
+      ]
+    },
+    {
+      "line": 108,
+      "text": "As validações terão caráter informativo e não bloquearão o fluxo de trabalho.",
+      "section": "Painel de informações e validações",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-064"
+      ]
+    },
+    {
+      "line": 112,
+      "text": "Guia web de leitura contínua.",
+      "section": "Exportação",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-065"
+      ]
+    },
+    {
+      "line": 113,
+      "text": "HTML com texto e estilos no arquivo; imagens das cartas carregadas da internet.",
+      "section": "Exportação",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-066"
+      ]
+    },
+    {
+      "line": 114,
+      "text": "PDF como relatório A4, com conteúdo contínuo e quebras automáticas.",
+      "section": "Exportação",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-067"
+      ]
+    },
+    {
+      "line": 115,
+      "text": "Exportar e importar uma cópia editável em arquivo JSON, preservando a estrutura completa e os campos Markdown dos guias.",
+      "section": "Exportação",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-068"
+      ]
+    },
+    {
+      "line": 116,
+      "text": "A cópia editável permite continuar o trabalho em outro navegador ou computador, mantendo a organização por arquétipo e a identificação da versão do guia.",
+      "section": "Exportação",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-069"
+      ]
+    },
+    {
+      "line": 120,
+      "text": "Tradução por LLM em uma etapa posterior.",
+      "section": "Tradução futura",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-070"
+      ]
+    },
+    {
+      "line": 121,
+      "text": "Manter os campos separados para permitir tradução por parte do guia.",
+      "section": "Tradução futura",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-071"
+      ]
+    },
+    {
+      "line": 122,
+      "text": "Preservar referências às cartas, quantidades e comandos de formatação durante a tradução.",
+      "section": "Tradução futura",
+      "kind": "confirmado",
+      "requirements": [
+        "SM-072"
+      ]
+    },
+    {
+      "line": 126,
+      "text": "O usuário solicitou uma distinção por modificador entre o nome com hover e a imagem direta. A sintaxe apresentada foi:",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-073",
+        "SM-074"
+      ]
+    },
+    {
+      "line": 130,
+      "text": "| `[Myr Enforcer]` | Nome destacado; imagem ao passar o mouse ou tocar. |",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-073"
+      ]
+    },
+    {
+      "line": 131,
+      "text": "| `![Myr Enforcer]` | Imagem da carta diretamente no documento. |",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-074"
+      ]
+    },
+    {
+      "line": 132,
+      "text": "| `4 [Myr Enforcer]` | Em um campo de lista, carta e quantidade para a visualização do deck. |",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-075"
+      ]
+    },
+    {
+      "line": 134,
+      "text": "Links e imagens comuns do Markdown mantêm sua sintaxe habitual, como `[texto](url)` e `![descrição](url)`.",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-076"
+      ]
+    },
+    {
+      "line": 136,
+      "text": "Na exportação para PDF, as referências de texto permanecem legíveis e as imagens explícitas são incorporadas à diagramação.",
+      "section": "Sintaxe proposta para referências",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-077"
+      ]
+    },
+    {
+      "line": 140,
+      "text": "Esta organização adapta o conteúdo do PPTX às decisões confirmadas. As seções permanecem personalizáveis.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-016",
+        "SM-017"
+      ]
+    },
+    {
+      "line": 142,
+      "text": "1. Informações do guia: título, autoria, versão e data de referência.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-078"
+      ]
+    },
+    {
+      "line": 143,
+      "text": "2. Apresentação do autor.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-079"
+      ]
+    },
+    {
+      "line": 144,
+      "text": "3. Sobre o deck: plano de jogo, mulligan e adaptação ao metagame.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-080"
+      ]
+    },
+    {
+      "line": 145,
+      "text": "4. Main deck e sua visualização.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-081"
+      ]
+    },
+    {
+      "line": 146,
+      "text": "5. Sideboard e sua visualização.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-082"
+      ]
+    },
+    {
+      "line": 147,
+      "text": "6. Escolhas de cartas e base de mana.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-083"
+      ]
+    },
+    {
+      "line": 148,
+      "text": "7. Maybeboard.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-084"
+      ]
+    },
+    {
+      "line": 149,
+      "text": "8. Matchups, com plano geral e variantes opcionais.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-085"
+      ]
+    },
+    {
+      "line": 150,
+      "text": "9. Encerramento e redes sociais.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-086"
+      ]
+    },
+    {
+      "line": 154,
+      "text": "Nome do arquétipo adversário.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-035"
+      ]
+    },
+    {
+      "line": 155,
+      "text": "Cartas que entram e saem.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-040"
+      ]
+    },
+    {
+      "line": 156,
+      "text": "Justificativa das trocas.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-087"
+      ]
+    },
+    {
+      "line": 157,
+      "text": "Plano de jogo.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-088"
+      ]
+    },
+    {
+      "line": 158,
+      "text": "Interações e cuidados técnicos.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-089"
+      ]
+    },
+    {
+      "line": 159,
+      "text": "Avaliação qualitativa do confronto, justificativa em Markdown e ajustes sugeridos.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-090",
+        "SM-041",
+        "SM-042"
+      ]
+    },
+    {
+      "line": 160,
+      "text": "Exemplos de mãos iniciais e comentários sobre keep ou mulligan.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-043",
+        "SM-044",
+        "SM-045",
+        "SM-046",
+        "SM-047",
+        "SM-048",
+        "SM-049",
+        "SM-050",
+        "SM-051"
+      ]
+    },
+    {
+      "line": 162,
+      "text": "Cada exemplo de mão segue as decisões da seção Mãos iniciais: sete cartas, um cenário, decisão e justificativa em Markdown.",
+      "section": "Modelo inicial proposto",
+      "kind": "detalhamento proposto",
+      "requirements": [
+        "SM-043",
+        "SM-044",
+        "SM-045",
+        "SM-046",
+        "SM-047",
+        "SM-048",
+        "SM-049",
+        "SM-050",
+        "SM-051"
+      ]
+    },
+    {
+      "line": 168,
+      "text": "Guardar uma identificação estável da carta junto à referência reconhecida, além do texto digitado, para sustentar nomes em dois idiomas e traduções futuras.",
+      "section": "Recomendações técnicas para a implementação",
+      "kind": "recomendacao tecnica proposta",
+      "requirements": [],
+      "design": "D1"
+    },
+    {
+      "line": 169,
+      "text": "Usar as mesmas listas como origem da grade visual e das verificações para evitar divergências entre representações.",
+      "section": "Recomendações técnicas para a implementação",
+      "kind": "recomendacao tecnica proposta",
+      "requirements": [],
+      "design": "D2"
+    },
+    {
+      "line": 170,
+      "text": "Informar a data da última consulta de legalidade e distinguir uma consulta pendente de um deck efetivamente validado.",
+      "section": "Recomendações técnicas para a implementação",
+      "kind": "recomendacao tecnica proposta",
+      "requirements": [],
+      "design": "D3"
+    },
+    {
+      "line": 174,
+      "text": "Organizar múltiplos guias por arquétipo, tratando cada versão como um guia independente e preservando os anteriores.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-005",
+        "SM-006",
+        "SM-007",
+        "SM-008",
+        "SM-009"
+      ]
+    },
+    {
+      "line": 175,
+      "text": "Criar um guia a partir do modelo e editar seções separadamente.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-016",
+        "SM-015"
+      ]
+    },
+    {
+      "line": 176,
+      "text": "Adicionar, renomear, excluir e reordenar seções.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-017"
+      ]
+    },
+    {
+      "line": 177,
+      "text": "Visualizar a edição em duas colunas.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-010"
+      ]
+    },
+    {
+      "line": 178,
+      "text": "Selecionar uma seção por vez no sumário hierárquico recolhível, exibindo seus campos na coluna de edição.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-011",
+        "SM-012"
+      ]
+    },
+    {
+      "line": 179,
+      "text": "Manter o guia completo na prévia e rolar até a seção escolhida no sumário.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-013",
+        "SM-014"
+      ]
+    },
+    {
+      "line": 180,
+      "text": "Reconhecer referências às cartas em inglês e português.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-020",
+        "SM-021"
+      ]
+    },
+    {
+      "line": 181,
+      "text": "Distinguir referências com hover de imagens explícitas.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-073",
+        "SM-074"
+      ]
+    },
+    {
+      "line": 182,
+      "text": "Transformar listas Markdown de main deck e sideboard em blocos visuais com quantidades.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-024",
+        "SM-025",
+        "SM-026",
+        "SM-027"
+      ]
+    },
+    {
+      "line": 183,
+      "text": "Exibir main deck e sideboard separados, agrupados por tipo em pilhas parcialmente sobrepostas, com nomes e quantidades visíveis.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-028",
+        "SM-029",
+        "SM-030",
+        "SM-031"
+      ]
+    },
+    {
+      "line": 184,
+      "text": "Abrir a imagem completa das cartas no hover ou toque, usando imagens escolhidas automaticamente.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-033",
+        "SM-034"
+      ]
+    },
+    {
+      "line": 185,
+      "text": "Criar planos gerais e variantes nomeadas em matchups.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-036",
+        "SM-037"
+      ]
+    },
+    {
+      "line": 186,
+      "text": "Identificar os adversários pelo nome do arquétipo.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-035"
+      ]
+    },
+    {
+      "line": 187,
+      "text": "Reutilizar nas variantes os campos do plano geral e permitir substituir apenas os campos específicos de cada variante.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-038",
+        "SM-039"
+      ]
+    },
+    {
+      "line": 188,
+      "text": "Registrar a avaliação dos confrontos na escala qualitativa de sete opções, com justificativa em Markdown.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-041",
+        "SM-042"
+      ]
+    },
+    {
+      "line": 189,
+      "text": "Criar exemplos de mãos de sete cartas, com cenário play/draw e pré/pós-side, decisão Manter/Mulligar/Situacional e justificativa em Markdown.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-043",
+        "SM-044",
+        "SM-045",
+        "SM-046",
+        "SM-047",
+        "SM-048",
+        "SM-049",
+        "SM-050",
+        "SM-051"
+      ]
+    },
+    {
+      "line": 190,
+      "text": "Exibir as sete cartas da mão individualmente e apontar quando a lista tiver uma quantidade diferente.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-051",
+        "SM-058"
+      ]
+    },
+    {
+      "line": 191,
+      "text": "Exibir os problemas de legalidade, quantidades, referências e trocas no painel.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-052",
+        "SM-053",
+        "SM-054",
+        "SM-055",
+        "SM-056",
+        "SM-057"
+      ]
+    },
+    {
+      "line": 192,
+      "text": "Exibir o painel como resumo compacto acima das duas colunas, com detalhes expansíveis e indicação dos campos com problemas.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-059",
+        "SM-060",
+        "SM-061"
+      ]
+    },
+    {
+      "line": 193,
+      "text": "Permitir salvar e exportar guias mesmo quando o painel indicar problemas.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-062",
+        "SM-063",
+        "SM-064"
+      ]
+    },
+    {
+      "line": 194,
+      "text": "Recuperar no navegador um guia salvo anteriormente.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-002"
+      ]
+    },
+    {
+      "line": 195,
+      "text": "Salvar automaticamente as alterações, exibindo o estado do salvamento e a última atualização.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-002",
+        "SM-003"
+      ]
+    },
+    {
+      "line": 196,
+      "text": "Exportar e importar uma cópia editável em JSON, preservando os campos Markdown e a estrutura do guia.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-068",
+        "SM-069"
+      ]
+    },
+    {
+      "line": 197,
+      "text": "Exportar HTML com imagens remotas e PDF A4 com paginação automática.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-066",
+        "SM-067"
+      ]
+    },
+    {
+      "line": 198,
+      "text": "Manter a estrutura de conteúdo preparada para a futura tradução por LLM.",
+      "section": "Critérios de aceite do escopo definido",
+      "kind": "criterio de aceite",
+      "requirements": [
+        "SM-070",
+        "SM-071",
+        "SM-072"
+      ]
+    }
+  ]
+}

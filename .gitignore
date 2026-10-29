@@ -1,24 +1,40 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-
-# Node dependencies
-node_modules
-
-# Logs
-logs
+node_modules/
+release/
+dist/
 *.log
 
-# Misc
-.DS_Store
-.fleet
-.idea
-
-# Local env files
+# Credentials and local environment
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local agent configuration and Python caches
+.agent/
+.codex/
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
+# Imported guides and original reference material
+/sources/
+/sidemaster-*.json
+/all_card_arts/
+/card_art_crops/
+/card_templates/
+/card_templates_art/
+/card_templates_inner/
+/hand_crops_all/
+/hand_crops_test/
+
+# Application profiles remain local
+/guides/
+/recovery/
+/session/
+/settings.json

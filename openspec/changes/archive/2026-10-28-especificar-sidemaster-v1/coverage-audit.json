@@ -1,0 +1,48 @@
+{
+  "objective": "Criar specs para todos os requisitos de docs/requisitos-v1.md",
+  "source": "docs/requisitos-v1.md",
+  "sourceSha256": "4615eac93c09378f2b54806f2d23469be4c4fdb27c0ac20772ee5fb57a4033e5",
+  "sourceUnchanged": true,
+  "sourceItems": 127,
+  "sourceItemsCovered": 127,
+  "sourceClassification": {
+    "objetivo ou referencia": 3,
+    "confirmado": 72,
+    "detalhamento proposto": 24,
+    "recomendacao tecnica proposta": 3,
+    "criterio de aceite": 25
+  },
+  "capabilities": 14,
+  "requirements": 90,
+  "classification": {
+    "confirmado": 72,
+    "detalhamento proposto": 5,
+    "modelo proposto": 13
+  },
+  "scenarios": 118,
+  "requirementsWithoutScenarios": [],
+  "requirementsMissingFromTasks": [],
+  "implementationTasks": 57,
+  "openspecStrictValid": true,
+  "artifactHashes": {
+    "specs/archetype-library/spec.md": "09ef1bfb3bb37979accc364f6bc408e31754fa99258d6de0c2733229bdc9cfa2",
+    "specs/card-catalog/spec.md": "69ab41c5589aca73a6ee4d122f117ebdf4f0981ae4d367dd02b76e5090253d4b",
+    "specs/card-markdown/spec.md": "3433117ea552cb3c5e93313f084a5c2eb94e1a008b3539c578f39644eb76bc00",
+    "specs/deck-lists/spec.md": "453df92814248b88962ccd4532219ae9bdc27a3c1eaf2c0402c30d50af8436f6",
+    "specs/deck-visualization/spec.md": "aaa0fb62b1308dfd265032a96d4fc5ef7fafd9ea930583ca34b9be7027734094",
+    "specs/guide-editor/spec.md": "3096f4494a798b2e5175083456150f743614a250ef485d3483a80fc7c42df040",
+    "specs/guide-export/spec.md": "12c5364dc554532fa49c908b7b4995441a91e06e4eb9324b8ce6ca9b081019f5",
+    "specs/guide-status-panel/spec.md": "6b3443e0c1276549abcb540d8e474f699de5edeb8d29fce2e210e3268ed657bb",
+    "specs/guide-storage/spec.md": "f301a376d862a46b1b1f428ccb675dd0ff228f428e44a17a87786b5cace269a8",
+    "specs/guide-template/spec.md": "6595646fffee5b027144eee2f67837cd2364f8d542eb12ba3a539030d2e66c15",
+    "specs/guide-validation/spec.md": "7124a5fb034b1a1ce2cd85aa19e61e3ca4093918e26aa1462678f27fb194ddf4",
+    "specs/matchup-plans/spec.md": "3f3401e7ff9dee41ef03f279ebc54484a816d98968db655d0da695be2cae043c",
+    "specs/opening-hands/spec.md": "46b1220da7827c98f4f62628341dda7adce274a3611bd8dba113430b10b5f184",
+    "specs/translation-readiness/spec.md": "3765812c574b4a696922b3bc2a5eebc2891f5a6b3824422bb2e9b2c4ed331ab2",
+    "proposal.md": "4eacb41ccd9711236bac65b4623995fa215d19fa5d5d17e337f92c224f80ae88",
+    "design.md": "37e5974edc83f581b6b477b56d3a197b69c1e0d538c4cff582f2cebb67bc2437",
+    "tasks.md": "43627381be8f6a841855979ccb92a9871b0039362fbb216117b11af3f8e32a27",
+    "rastreabilidade.md": "da18edb906ec1d41bdcc02445056ab8b47848cfd367167fe25721ff3b529a9b4",
+    "traceability.json": "e7e31ea925031627ad885920d0b5c95b92e4b78c9c3bfa32d0a59ba5c958bab2"
+  }
+}
