@@ -219,7 +219,7 @@ function renderEditor() {
     fields += '<p class="editor-hint">Use quantidade e nome por linha, como <code>4 [Myr Enforcer]</code>. A prévia agrupa as cartas automaticamente e mostra até quatro cópias em cada pilha.</p>';
   }
   if (node.type === 'hand') {
-    fields += `<p class="editor-hint">${matchup ? `Exemplo para ${esc(matchup.title)}.` : 'Exemplo geral do deck, sem adversário definido.'} Informe exatamente sete cartas.</p><div class="inline-fields">${select('turn', 'Posição', ['Play', 'Draw', 'Sempre'], node.fields.turn)}${select('phase', 'Momento', matchup ? ['Pré-side', 'Pós-side', 'Sempre'] : ['Pré-side'], node.fields.phase)}${select('decision', 'Decisão', ['Manter', 'Mulligar', 'Situacional'], node.fields.decision)}</div>${textarea('cards', 'Cartas — quantidade e nome por linha', node.fields.cards, 7)}${textarea('justification', 'Justificativa em Markdown', node.fields.justification)}`;
+    fields += `<p class="editor-hint">${matchup ? `Exemplo para ${esc(matchup.title)}.` : 'Exemplo geral do deck, sem adversário definido.'} Informe exatamente sete cartas.</p><div class="inline-fields">${select('turn', 'Posição', ['Play', 'Draw', 'Sempre'], node.fields.turn)}${select('phase', 'Momento', ['Pré-side', 'Pós-side', 'Sempre'], node.fields.phase)}${select('decision', 'Decisão', ['Manter', 'Mulligar', 'Situacional'], node.fields.decision)}</div>${textarea('cards', 'Cartas — quantidade e nome por linha', node.fields.cards, 7)}${textarea('justification', 'Justificativa em Markdown', node.fields.justification)}`;
   } else if (node.type === 'plan' || node.type === 'variant') {
     const variant = node.type === 'variant';
     const plan = variant ? effectivePlan(matchup, node) : node.fields;

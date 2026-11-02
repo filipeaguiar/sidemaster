@@ -137,6 +137,96 @@ export function inventoryGuide(snapshot, limit = 1200) {
   return units;
 }
 
+
+function unitAddress(path) { return JSON.stringify(path); }
+
+function priorVersion(entry, model, savedAt) {
+  return {
+    source: entry.source,
+    sourceHash: entry.sourceHash,
+    tokens: structuredClone(entry.tokens || []),
+    translatedText: entry.translatedText || '',
+    status: entry.status,
+    reviewed: Boolean(entry.reviewed),
+    model: model || '',
+    savedAt
+  };
+}
+
+export function reconcileTranslation(item, guide, limit = item?.unitLimit || 1200) {
+  const snapshot = editorialSnapshot(guide);
+  const sourceHash = snapshotHash(snapshot);
+  if (item.sourceHash === sourceHash) return false;
+
+  const previousSourceHash = item.sourceHash;
+  const oldUnits = item.units || [];
+  const remaining = new Set(oldUnits);
+  const exact = new Map();
+  for (const old of oldUnits) {
+    const key = JSON.stringify([unitAddress(old.path), old.source]);
+    if (!exact.has(key)) exact.set(key, []);
+    exact.get(key).push(old);
+  }
+  const nextUnits = inventoryGuide(snapshot, limit);
+  const unmatchedNext = [];
+  for (const fresh of nextUnits) {
+    const bucket = exact.get(JSON.stringify([unitAddress(fresh.path), fresh.source]));
+    const previous = bucket?.find(entry => remaining.has(entry));
+    if (!previous) { unmatchedNext.push(fresh); continue; }
+    remaining.delete(previous);
+    Object.assign(fresh, previous, {
+      path: fresh.path,
+      paragraphIndex: fresh.paragraphIndex,
+      chunkIndex: fresh.chunkIndex,
+      chunkCount: fresh.chunkCount,
+      rangeStart: fresh.rangeStart,
+      rangeEnd: fresh.rangeEnd,
+      source: fresh.source,
+      sourceHash: fresh.sourceHash,
+      protectedSource: fresh.protectedSource,
+      tokens: fresh.tokens,
+      unitLimit: fresh.unitLimit
+    });
+    if (fresh.segments?.length && fresh.protectedSource !== previous.protectedSource) {
+      delete fresh.segments;
+      delete fresh.segmenterVersion;
+    }
+  }
+
+  const changedAt = new Date().toISOString();
+  for (const fresh of unmatchedNext) {
+    const address = unitAddress(fresh.path);
+    const candidates = [...remaining].filter(old => unitAddress(old.path) === address);
+    const newAtAddress = unmatchedNext.filter(entry => unitAddress(entry.path) === address);
+    if (candidates.length !== 1 || newAtAddress.length !== 1) continue;
+    candidates.sort((a, b) => Math.abs((a.paragraphIndex || 0) - (fresh.paragraphIndex || 0)) - Math.abs((b.paragraphIndex || 0) - (fresh.paragraphIndex || 0)));
+    const previous = candidates[0];
+    if (!previous) continue;
+    remaining.delete(previous);
+    const history = [...(previous.history || [])];
+    if (previous.translatedText || ['translated', 'reviewed'].includes(previous.status)) history.push(priorVersion(previous, item.model, changedAt));
+    fresh.history = history.slice(-20);
+    fresh.sourceChanged = true;
+  }
+
+  item.removedUnits ||= [];
+  for (const removed of remaining) item.removedUnits.push({ removedAt: changedAt, unit: structuredClone(removed) });
+  item.sourceSnapshot = snapshot;
+  item.sourceHash = sourceHash;
+  item.units = nextUnits;
+  item.updatedAt = changedAt;
+  if (item.generatedGuideId) {
+    item.generatedGuideHistory ||= [];
+    item.generatedGuideHistory.push({ guideId: item.generatedGuideId, sourceHash: previousSourceHash, savedAt: changedAt });
+    delete item.generatedGuideId;
+  }
+  item.reconciliationUncommitted = true;
+  if (nextUnits.every(entry => ['translated', 'reviewed'].includes(entry.status)) && nextUnits.length) item.status = 'complete';
+  else if (nextUnits.some(entry => entry.status === 'error')) item.status = 'error';
+  else item.status = 'paused';
+  return true;
+}
+
 export function validateTranslation(unit, candidate) {
   if (typeof candidate !== 'string' || !candidate.trim()) return { ok: false, error: 'A tradução está vazia.' };
   const preamble = /^(?:(?:claro|com certeza|segue abaixo|sure|of course)[,!\s.:-]*)?(?:aqui (?:está|vai) a tradução(?: para [^\n:.]+)?|segue a tradução(?: para [^\n:.]+)?|a tradução(?: para [^\n:.]+)?(?: é| segue)?|here(?:'s| is) the translation(?: into [^\n:.]+)?|the translation(?: into [^\n:.]+)?(?: is)?|translation)\s*(?:[:：–—-]|[.!?]\s*)\s*/i;
@@ -195,7 +285,7 @@ export function assembleGuide(snapshot, units, targetLanguage, translationId = '
   }
   guide.schemaVersion = SCHEMA_VERSION; guide.contentLanguage = targetLanguage; guide.translations = [];
   guide.provenance ||= {};
-  guide.provenance = { sourceGuideId: snapshot.guideId, sourceLanguage: snapshot.contentLanguage || 'pt-BR', translationId };
+  guide.provenance = { sourceGuideId: snapshot.guideId, sourceLanguage: snapshot.contentLanguage || 'pt-BR', translationId, sourceHash: snapshotHash(snapshot) };
   function renew(list) { for (const node of list || []) { node.id = `section_${crypto.randomUUID()}`; renew(node.children); } }
   renew(guide.sections); guide.guideId = `guide_${crypto.randomUUID()}`;
   guide.versionLabel = `${snapshot.versionLabel || 'V1'} · ${targetLanguage}`;

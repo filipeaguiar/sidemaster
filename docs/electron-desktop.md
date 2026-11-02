@@ -5,10 +5,10 @@
 - Node.js 22.12.x e npm compatível com o `package-lock.json`.
 - `npm ci` instala Electron 45.1.0 e electron-builder 26.18.0.
 - `npm start` abre o perfil separado `SideMaster-dev`.
-- `npm run dist:linux` gera Linux x64 em `release/SideMaster-1.0.0-x86_64.AppImage`.
-- `npm run dist:win` gera os dois pacotes Windows x64: instalador `release/SideMaster-1.0.0-Setup.exe` e executável portátil `release/SideMaster-1.0.0-Portable.exe`.
+- `npm run dist:linux` gera Linux x64 em `release/SideMaster-1.0.1-x86_64.AppImage`.
+- `npm run dist:win` gera os dois pacotes Windows x64: instalador `release/SideMaster-1.0.1-Setup.exe` e executável portátil `release/SideMaster-1.0.1-Portable.exe`.
 - `npm run dist:appimage-portable` gera somente o AppImage Linux e o `.exe` Portable Windows em uma única chamada. Execute em Linux com Wine instalado; o alvo AppImage exige Linux e o build Windows cruzado no Linux usa Wine.
-- Os comandos de build usam `--publish never`: geram pacotes locais ou artefatos do CI. A publicação em Releases é uma ação separada e explícita pelo `gh`.
+- Os comandos locais de build usam `--publish never`. No GitHub Actions, a tag `v1.0.1` executa os builds Linux e Windows e publica o AppImage e o Portable como anexos de uma GitHub Release.
 - As janelas do aplicativo não exibem a barra de menus padrão do Electron.
 - Linux exige as bibliotecas compartilhadas do Electron. Para usar AppImage, a distribuição também precisa de FUSE 2 ou de executar `--appimage-extract` e abrir o AppRun extraído.
 - Gere o instalador Windows em Windows; o workflow usa `windows-2022` e verifica instalação e inicialização. Build cross-platform em Linux não conta como teste do aplicativo no Windows.
@@ -43,4 +43,4 @@ Na revisão local atual, o AppImage Linux x64 foi gerado (`release/SideMaster-1.
 
 No mesmo AppImage, Scryfall encontrou Myr Enforcer; a imagem foi armazenada no IndexedDB em `session/IndexedDB`. Depois de encerrar e reabrir o aplicativo com esse perfil e sem chamadas de rede, a carta e a imagem foram recuperadas do cache. O gerador PDF incorpora imagens disponíveis no cache; imagens indisponíveis continuam usando o nome alternativo se não carregarem dentro do prazo. A lista do `app.asar` contém apenas o runtime, ícones, HTML e módulos usados; PPTX/HTML fonte, coleções de arte, recortes, scripts de análise e diretórios de planejamento ficaram fora.
 
-O job Windows está configurado para construir NSIS e Portable 1.0.0, instalar, testar edição e fechamento, tentar uma segunda instância, gerar NSIS e Portable 1.0.1, atualizar a instalação e verificar que o guia continua disponível. Os arquivos Linux e Windows são anexados à execução do workflow como artefatos baixáveis. O job precisa ser executado em um runner Windows para confirmar os executáveis e o ciclo de atualização; esta máquina Linux não fornece essa evidência ainda.
+O job Windows está configurado para construir NSIS e Portable 1.0.0 como base de atualização, instalar, testar edição e fechamento, gerar NSIS e Portable 1.0.1, atualizar a instalação e verificar que o guia continua disponível. Na execução pela tag `v1.0.1`, somente o Portable 1.0.1 e o AppImage 1.0.1 são publicados na Release; a execução também mantém artefatos de CI para inspeção. O job precisa ser executado em um runner Windows para confirmar os executáveis e o ciclo de atualização.

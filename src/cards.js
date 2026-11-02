@@ -12,6 +12,7 @@ import {
 } from './card-storage.js';
 import { parseList } from './deck.js';
 import { walkNodes } from './model.js';
+import { collectMarkdownCardReferences } from './markdown.js';
 
 const cache = new Map();
 const resolved = new Map();
@@ -189,9 +190,7 @@ export function collectGuideCardNames(guide) {
     }
     const checkText = (text) => {
       if (typeof text !== 'string') return;
-      for (const m of text.matchAll(/!?\[([^\]]+)\]/g)) {
-        names.push(m[1].trim());
-      }
+      names.push(...collectMarkdownCardReferences(text));
     };
     if (node.fields) {
       for (const val of Object.values(node.fields)) checkText(val);

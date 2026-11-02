@@ -1,4 +1,4 @@
-import { editorialSnapshot, snapshotHash, inventoryGuide, validateTranslation, assembleGuide } from './translation-engine.js';
+import { editorialSnapshot, snapshotHash, inventoryGuide, validateTranslation, assembleGuide, reconcileTranslation } from './translation-engine.js';
 import { renderGuide, hydrateCards } from './reading.js';
 import { escapeHtml as esc } from './markdown.js';
 import { prepareBlock, translateBlock, blockProgress, acceptManualBlock } from './translation-segments.js';
@@ -28,6 +28,7 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
   const testSignature = () => JSON.stringify([$('#translation-source').value, target(), currentModel(), promptTemplate()]);
   const countDone = item => item.units.filter(entry => ['translated', 'reviewed'].includes(entry.status)).length;
   const countReviewPending = item => item.units.filter(entry => entry.status === 'translated').length;
+  const countSourceChanged = item => item.units.filter(entry => entry.sourceChanged).length;
   const complete = item => item.units.every(entry => ['translated', 'reviewed'].includes(entry.status)) && item.units.length > 0;
   const hasUnknown = item => item.units.some(entry => entry.status === 'error' && entry.path.kind === 'unknown');
 
@@ -75,7 +76,10 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     const g = guide(); if (!g) return;
     const active = record(); if (active) active.updatedAt = new Date().toISOString();
     $('#translation-save-state').textContent = 'Salvando…';
-    await saveGuide(g);
+    const reconciliation = active?.reconciliationUncommitted;
+    if (reconciliation) delete active.reconciliationUncommitted;
+    try { await saveGuide(g); }
+    catch (error) { if (reconciliation) active.reconciliationUncommitted = true; throw error; }
     $('#translation-save-state').textContent = 'Salvo';
   }
 
@@ -93,7 +97,7 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
   const tested = () => $('#translation-test-result').dataset.valid === 'true' && $('#translation-test-result').dataset.signature === testSignature();
   const sameSettings = item => item && item.sourceLanguage === $('#translation-source').value && item.targetLanguage === target()
     && item.model === currentModel() && item.promptProfile?.template === promptTemplate();
-  const resumable = item => sameSettings(item) && !item.generatedGuideId && ['draft', 'paused', 'interrupted', 'error', 'canceled'].includes(item.status)
+  const resumable = item => sameSettings(item) && !item.generatedGuideId && !item.reconciliationUncommitted && ['draft', 'paused', 'interrupted', 'error', 'canceled'].includes(item.status)
     && snapshotHash(editorialSnapshot(item.sourceSnapshot)) === snapshotHash(editorialSnapshot(guide()));
   const runnable = entry => (!entry.manualOnly || !entry.segmenterVersion) && entry.path.kind !== 'unknown' && !entry.manuallyEdited
     && (entry.status === 'error' || (entry.status === 'pending' && (!entry.translatedText || Array.isArray(entry.segments))));
@@ -132,7 +136,7 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     const needsAcceptance = continuing && !item.units.some(runnable) && !done;
     const start = $('#translation-start');
     start.hidden = Boolean(done && sameSettings(item));
-    start.disabled = Boolean(issue) || busy || !tested() || needsAcceptance;
+    start.disabled = Boolean(issue) || busy || !tested() || needsAcceptance || Boolean(item?.reconciliationUncommitted);
     start.textContent = active ? 'Traduzindo…' : continuing && countDone(item) > 0 ? 'Continuar tradução' : continuing && item.status === 'error' ? 'Tentar trechos com erro' : item && !continuing ? 'Iniciar nova tradução' : 'Iniciar tradução';
     const test = $('#translation-test'); test.disabled = Boolean(issue) || busy;
     test.hidden = Boolean(done && sameSettings(item));
@@ -149,6 +153,7 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     let next = issue || (tested() ? `Confira a amostra abaixo. Se estiver adequada, clique em ${start.textContent}.` : `Clique em Testar trecho. Depois de conferir a amostra, o botão ${start.textContent} será liberado.`);
     if (testing) next = 'Aguarde a resposta do modelo. Isso pode levar alguns segundos. Você pode cancelar o teste.';
     else if (active) { const working = item?.units.find(entry => entry.status === 'running'), progress = working && blockProgress(working); next = working ? `Traduzindo: ${pathLabel(working)}${progress?.total > 1 ? ` · parte ${Math.max(1, progress.current + 1)} de ${progress.total}` : ''}. Cada parte é salva antes da próxima.` : 'Preparando o modelo e salvando o rascunho…'; }
+    else if (item?.reconciliationUncommitted) next = 'A alteração do original foi detectada, mas o checkpoint não pôde ser salvo. Corrija o armazenamento antes de continuar.';
     else if (item?.generatedGuideId) next = 'A cópia está salva como um guia independente. Volte ao guia para abri-la na Biblioteca.';
     else if (done) next = `${countReviewPending(item)} trecho(s) aguardam revisão humana. Revise abaixo ou clique em Criar guia traduzido para gerar uma cópia editável.`;
     else if (needsAcceptance) next = 'Os trechos restantes precisam de edição manual ou confirmação. Use os filtros abaixo, corrija o texto e clique em Salvar tradução.';
@@ -222,7 +227,8 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
       const selected = entries.find(entry => entry.unitId === currentUnitId);
       const destination = selected || entries.find(entry => ['pending', 'error'].includes(entry.status) && entry.path.key !== 'title')
         || entries.find(entry => ['pending', 'error'].includes(entry.status)) || entries.find(entry => entry.path.key !== 'title') || entries[0];
-      const description = `${info.title} — ${names[state]}. ${all.filter(entry => ['translated', 'reviewed'].includes(entry.status)).length} de ${all.length} trechos concluídos.`;
+      const changed = all.some(entry => entry.sourceChanged);
+      const description = `${info.title} — ${changed ? 'original alterado; não traduzido' : names[state]}. ${all.filter(entry => ['translated', 'reviewed'].includes(entry.status)).length} de ${all.length} trechos concluídos.`;
       return `<button type="button" class="translation-section" data-open-unit="${esc(destination.unitId)}" data-reading-node="${esc(key)}" style="--translation-depth:${Math.min(2, info.depth)}" aria-label="${esc(description)}" title="${esc(description)}" aria-current="${Boolean(selected)}"><span class="translation-section-title">${esc(info.title)}</span><span class="translation-section-icon" data-status="${state}" aria-hidden="true">${icons[state]}</span></button>`;
     }).join('') : '<p class="translation-help">Nenhuma seção neste filtro.</p>';
   }
@@ -245,12 +251,13 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     if (result.dataset.unitId !== currentUnitId || document.activeElement !== result) result.value = entry ? readableText(entry) : '';
     result.dataset.unitId = currentUnitId || '';
     $('#translation-unit-path').textContent = entry ? pathLabel(entry) : 'Selecione um trecho';
-    $('#translation-unit-status').textContent = entry ? `${labels[entry.status] || entry.status}${entry.reviewed ? ' · Revisão humana concluída' : ''}` : '';
+    $('#translation-unit-status').textContent = entry ? `${entry.sourceChanged ? 'Não traduzido — original alterado' : labels[entry.status] || entry.status}${entry.reviewed ? ' · Revisão humana concluída' : ''}` : '';
     $('#translation-unit-error').hidden = !entry?.error;
     $('#translation-unit-error').textContent = entry?.error || '';
     const history = entry?.history || [];
-    $('#translation-history').hidden = !history.length;
-    $('#translation-history ol').innerHTML = history.slice().reverse().map(version => `<li><small>${new Date(version.savedAt).toLocaleString()} · ${esc(labels[version.status] || version.status)} · ${esc(version.model || '')}</small><pre>${esc(version.translatedText)}</pre></li>`).join('');
+    const removed = (record()?.removedUnits || []).slice(-20).reverse().map(item => `<li><small>Original removido · ${new Date(item.removedAt).toLocaleString()}</small><p><strong>Trecho anterior</strong></p><pre>${esc(item.unit.source)}</pre>${item.unit.translatedText ? `<pre>${esc(readableText(item.unit))}</pre>` : ''}</li>`).join('');
+    $('#translation-history ol').innerHTML = history.slice().reverse().map(version => `<li><small>${new Date(version.savedAt).toLocaleString()} · ${esc(labels[version.status] || version.status)} · ${esc(version.model || '')}</small>${version.source ? `<p><strong>Original anterior</strong></p><pre>${esc(version.source)}</pre>` : ''}<pre>${esc(readableText(version))}</pre></li>`).join('') + removed;
+    $('#translation-history').hidden = !history.length && !removed;
     renderUnits(); updateControls(); renderPreview();
   }
   function renderPreview() {
@@ -286,7 +293,8 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     }
     $('#translation-run-title').textContent = `${languageNames[item.targetLanguage] || item.targetLanguage} · ${item.model}`;
     const current = item.units.find(entry => entry.status === 'running');
-    statusElement().textContent = `${labels[item.status] || item.status}${current ? ` · ${pathLabel(current)}` : ''}${countReviewPending(item) ? ` · ${countReviewPending(item)} trecho(s) aguardam revisão` : ''}${snapshotHash(editorialSnapshot(item.sourceSnapshot)) !== snapshotHash(editorialSnapshot(guide())) ? ' · Original alterado' : ''}`;
+    const staleCount = countSourceChanged(item);
+    statusElement().textContent = `${labels[item.status] || item.status}${staleCount ? ` · ${staleCount} trecho(s) não traduzido(s) — original alterado` : ''}${item.reconciliationUncommitted ? ' · atualização não salva' : ''}${current ? ` · ${pathLabel(current)}` : ''}${countReviewPending(item) ? ` · ${countReviewPending(item)} trecho(s) aguardam revisão` : ''}`;
     const max = Math.max(1, item.units.length); const progress = $('#translation-progress'); progress.max = max; progress.value = countDone(item);
     $('#translation-progress-count').textContent = `${countDone(item)} de ${item.units.length} trechos`;
     if (item.generatedGuideId) statusElement().textContent += ' · Guia traduzido criado';
@@ -347,6 +355,11 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     if (testing) return;
     if (!item || !tested() || !sameSettings(item)) throw new Error('Clique em Testar trecho com a configuração deste rascunho antes de iniciar.');
     if (configurationIssue()) throw new Error(configurationIssue());
+    if (item.reconciliationUncommitted) throw new Error('A atualização do original ainda não foi salva.');
+    if (snapshotHash(editorialSnapshot(guide())) !== item.sourceHash) {
+      if (reconcileTranslation(item, guide())) { await save(); renderRecord(); }
+      throw new Error('O original mudou. Confira os trechos pendentes e teste novamente antes de continuar.');
+    }
     for (const entry of item.units.filter(runnable)) prepareBlock(entry, item.unitLimit || 1200);
     if (item.units.reduce((count, entry) => count + (entry.segments?.length || 1), 0) > 10000) throw new Error('Esta tradução excede o limite de 10.000 partes. Aumente o tamanho por trecho e prepare um novo rascunho.');
     if (!retryId) { setReviewView('guide'); setReadingWide(true); $('#translation-test-panel').hidden = true; }
@@ -364,14 +377,21 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
         renderRecord();
         try {
           await translateBlock(entry, { limit: item.unitLimit || 1200, onlySegmentId: retrySegmentId,
-            generate: part => callModel(item, part), stopped: () => Boolean(stopMode), checkpoint: async () => { await save(); renderRecord(); } });
+            generate: part => callModel(item, part), stopped: () => Boolean(stopMode) || snapshotHash(editorialSnapshot(guide())) !== item.sourceHash, checkpoint: async () => { await save(); renderRecord(); } });
+          if (snapshotHash(editorialSnapshot(guide())) !== item.sourceHash) { stopMode = 'source-changed'; break; }
           if (stopMode) break;
+          if (['translated', 'reviewed'].includes(entry.status)) delete entry.sourceChanged;
           if (entry.status === 'error') { item.status = 'error'; currentUnitId = entry.unitId; $('#translation-filter').value = 'all'; setReviewView('block'); await save(); renderRecord(); notice(`A tradução parou em ${pathLabel(entry)}: ${entry.error} As partes concluídas foram salvas.`, true); return; }
         } catch (error) {
           if (stopMode || error.name === 'AbortError') { entry.status = 'pending'; break; }
           entry.status = 'error'; entry.error = error.message; item.status = 'error'; currentUnitId = entry.unitId; setReviewView('block'); await save(); renderRecord();
           notice(`A tradução parou em ${pathLabel(entry)}: ${error.message} Corrija o trecho abaixo ou tente continuar.`, true); return;
         }
+      }
+      if (stopMode === 'source-changed' || snapshotHash(editorialSnapshot(guide())) !== item.sourceHash) {
+        stopMode = null; reconcileTranslation(item, guide());
+        $('#translation-test-result').dataset.valid = 'false'; $('#translation-test-result').dataset.signature = ''; $('#translation-test-panel').hidden = true;
+        currentUnitId = item.units.find(entry => entry.sourceChanged || ['pending', 'error'].includes(entry.status))?.unitId || item.units[0]?.unitId || null;
       }
       if (stopMode === 'pause') item.status = 'paused';
       else if (stopMode === 'cancel') item.status = 'canceled';
@@ -409,6 +429,12 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     currentTranslationId = guide()?.translations?.at(-1)?.translationId || null;
     const saved = record();
     setScreen('translations'); configureFrom(saved);
+    if (saved && reconcileTranslation(saved, guide())) {
+      $('#translation-test-result').dataset.valid = 'false'; $('#translation-test-result').dataset.signature = ''; $('#translation-test-panel').hidden = true;
+      try { await save(); notice('O original mudou. Os trechos afetados foram marcados para tradução novamente.'); }
+      catch (error) { saved.reconciliationUncommitted = true; notice('Não foi possível salvar a atualização do original: ' + error.message, true); }
+      configureFrom(saved);
+    }
     setReviewView('guide'); setReadingWide(Boolean(saved && countDone(saved) > 0));
     if (saved?.status === 'running') {
       saved.status = 'interrupted'; saved.units.forEach(entry => { if (entry.status === 'running') entry.status = 'pending'; });
@@ -451,14 +477,14 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
       const first = prepareBlock(candidate, 500).find(part => !part.manualOnly);
       if (!first) throw new Error('Este bloco exige tradução manual. Escolha outro trecho do guia para testar.');
       const sample = { ...first, unitId: 'test', path: candidate.path, status: 'pending', unitLimit: 500 };
-      const item = { sourceLanguage, targetLanguage, model: currentModel() };
+      const item = { sourceLanguage, targetLanguage, model: currentModel(), sourceHash: snapshotHash(editorialSnapshot(guide())) };
       const signature = testSignature();
       testing = true; stopMode = null; notice(); $('#translation-test-panel').hidden = false;
       $('#translation-test-original').textContent = sample.source;
       $('#translation-test-result').textContent = 'Aguardando resposta do modelo…'; $('#translation-test-result').dataset.valid = 'false';
       $('#translation-test-state').textContent = 'Testando um trecho do seu guia'; renderRuns(); updateControls();
       testJob = (async () => {
-        await translateBlock(sample, { limit: 500, generate: part => callModel(item, part), stopped: () => Boolean(stopMode), checkpoint: async () => {
+        await translateBlock(sample, { limit: 500, generate: part => callModel(item, part), stopped: () => Boolean(stopMode) || snapshotHash(editorialSnapshot(guide())) !== item.sourceHash, checkpoint: async () => {
           const progress = blockProgress(sample);
           $('#translation-test-state').textContent = progress.total > 1 ? `Testando um bloco do guia · ${progress.done}/${progress.total} partes` : 'Testando um trecho do seu guia';
           if (sample.translatedText) $('#translation-test-result').textContent = readableText(sample);
@@ -486,6 +512,11 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
       await flushManualEdits();
       const g = guide(), sourceLanguage = $('#translation-source').value, targetLanguage = target();
       const current = record();
+      if (current && reconcileTranslation(current, g)) {
+        $('#translation-test-result').dataset.valid = 'false'; $('#translation-test-result').dataset.signature = ''; $('#translation-test-panel').hidden = true;
+        await save(); configureFrom(current); notice('O original mudou. Confira um novo trecho de teste antes de continuar.'); return;
+      }
+      if (current?.reconciliationUncommitted) throw new Error('A atualização do original ainda não foi salva.');
       if (resumable(current)) { await run(current); return; }
       if (!/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(targetLanguage)) throw new Error('Informe um código BCP 47 válido.');
       if (targetLanguage.toLowerCase() === sourceLanguage.toLowerCase()) throw new Error('Escolha idiomas diferentes.');
@@ -528,7 +559,10 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     const item = record(); if (!item || !complete(item)) return;
     try {
       const sourceGuide = guide();
-      const existing = (await getGuideLibrary()).find(entry => entry.provenance?.translationId === item.translationId);
+      if (reconcileTranslation(item, sourceGuide)) { await save(); renderRecord(); throw new Error('O original mudou. Resolva os novos trechos antes de criar uma cópia atualizada.'); }
+      if (item.reconciliationUncommitted) throw new Error('A atualização do original ainda não foi salva.');
+      const sourceHash = snapshotHash(editorialSnapshot(sourceGuide));
+      const existing = (await getGuideLibrary()).find(entry => entry.provenance?.translationId === item.translationId && entry.provenance?.sourceHash === sourceHash);
       if (existing) { item.generatedGuideId = existing.guideId; await saveGuide(sourceGuide); renderRecord(); return; }
       const copy = assembleGuide(item.sourceSnapshot, item.units, item.targetLanguage, item.translationId);
       await createGuide(copy);
@@ -555,6 +589,12 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     try {
       await flushManualEdits(); currentTranslationId = button.dataset.openTranslation;
       const item = record(); configureFrom(item);
+      if (item && reconcileTranslation(item, guide())) {
+        $('#translation-test-result').dataset.valid = 'false'; $('#translation-test-result').dataset.signature = ''; $('#translation-test-panel').hidden = true;
+        try { await save(); notice('O original mudou. Os trechos afetados foram marcados para tradução novamente.'); }
+        catch (error) { item.reconciliationUncommitted = true; notice('Não foi possível salvar a atualização do original: ' + error.message, true); }
+        configureFrom(item);
+      }
       if (item?.status === 'running') { item.status = 'interrupted'; item.units.forEach(entry => { if (entry.status === 'running') entry.status = 'pending'; }); await save(); }
       await inspectModel(); renderRecord();
     } catch (error) { notice(error.message, true); }
@@ -624,7 +664,8 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     clearTimeout(manualSaveTimer); manualSaveTimer = null;
     const candidate = editedText(entry), checked = validateTranslation(entry, candidate);
     if (!checked.ok) { entry.error = checked.error; renderUnit(); return; }
-    entry.translatedText = candidate; entry.status = entry.reviewed ? 'reviewed' : 'translated'; entry.error = '';
+    if (snapshotHash(editorialSnapshot(guide())) !== item.sourceHash) { entry.translatedText = candidate; entry.status = 'translated'; entry.reviewed = false; reconcileTranslation(item, guide()); try { await save(); } catch (error) { item.reconciliationUncommitted = true; } renderRecord(); notice('O original mudou. Revise a versão atual do trecho antes de salvá-lo.', true); return; }
+    entry.translatedText = candidate; entry.status = entry.reviewed ? 'reviewed' : 'translated'; entry.error = ''; delete entry.sourceChanged;
     acceptManualBlock(entry);
     if (complete(item)) item.status = 'complete';
     try { await save(); renderRecord(); } catch (error) { notice(`Falha ao salvar: ${error.message}`, true); }
@@ -634,7 +675,8 @@ export function createTranslationWorkspace({ getGuide, saveGuide, createGuide, s
     clearTimeout(manualSaveTimer); manualSaveTimer = null;
     const candidate = editedText(entry), checked = validateTranslation(entry, candidate);
     if (!checked.ok) { entry.error = checked.error; renderUnit(); return; }
-    entry.translatedText = candidate; entry.status = 'reviewed'; entry.reviewed = true; entry.error = '';
+    if (snapshotHash(editorialSnapshot(guide())) !== item.sourceHash) { entry.translatedText = candidate; entry.status = 'translated'; entry.reviewed = false; reconcileTranslation(item, guide()); try { await save(); } catch (error) { item.reconciliationUncommitted = true; } renderRecord(); notice('O original mudou. Revise a versão atual do trecho antes de marcá-lo como revisado.', true); return; }
+    entry.translatedText = candidate; entry.status = 'reviewed'; entry.reviewed = true; entry.error = ''; delete entry.sourceChanged;
     acceptManualBlock(entry);
     if (complete(item)) item.status = 'complete';
     try { await save(); renderRecord(); } catch (error) { notice(`Falha ao salvar: ${error.message}`, true); }

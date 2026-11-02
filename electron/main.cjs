@@ -80,7 +80,7 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     try {
       const target = new URL(url);
-      if (target.protocol === 'https:' && target.hostname && !target.username && !target.password) shell.openExternal(target.href);
+      if (['http:', 'https:'].includes(target.protocol) && target.hostname && !target.username && !target.password) shell.openExternal(target.href);
     } catch {}
     return { action: 'deny' };
   });

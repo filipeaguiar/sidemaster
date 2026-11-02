@@ -1,5 +1,5 @@
 import { parseList, deckProblems } from './deck.js?v=hand-images-fix';
-import { walkNodes, containingMatchup, effectivePlan } from './model.js?v=hierarchy-v3';
+import { walkNodes, effectivePlan } from './model.js?v=hierarchy-v3';
 
 export function validateGuide(guide) {
   const main = parseList(guide.deck?.main || ''), side = parseList(guide.deck?.sideboard || '');
@@ -13,7 +13,6 @@ export function validateGuide(guide) {
     const path = [...ancestors, node].map(n => n.title).join(' / ');
     if (count !== 7) add(node, `${path}: mão tem ${count}/7 cartas`);
     entries.filter(e => e.error).forEach(e => add(node, `${path}: linha ${e.line}: ${e.error}`));
-    if (!containingMatchup(guide, node.id) && node.fields.phase === 'Pós-side') add(node, `${path}: mão pós-side precisa estar dentro de um matchup`);
   }
   const sideAvailable = new Map();
   for (const entry of side) if (!entry.error) sideAvailable.set(entry.name, (sideAvailable.get(entry.name) || 0) + entry.quantity);

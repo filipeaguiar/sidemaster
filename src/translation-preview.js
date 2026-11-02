@@ -20,7 +20,7 @@ export function renderProgressiveGuide(snapshot, units, language, { idPrefix = '
     if (done(unit)) value = validateTranslation(unit, unit.translatedText).text;
     else if (unit.manuallyEdited) return pending(unit, 'manual', inline ? 'title' : 'block');
     else if (unit.segmenterVersion === 1 && unit.segments?.length) {
-      if (!unit.segments.some(done)) return pending(unit, unit.status, inline ? 'title' : 'block');
+      if (!unit.segments.some(done)) return pending(unit, unit.sourceChanged ? 'source-changed' : unit.status, inline ? 'title' : 'block');
       value = unit.protectedSource;
       for (const [index, part] of unit.segments.map((part, index) => [index, part]).reverse()) {
         const text = done(part) ? part.translatedText : pending(unit, part.status, 'part', index + 1);
@@ -28,7 +28,7 @@ export function renderProgressiveGuide(snapshot, units, language, { idPrefix = '
       }
       value = restore(value, unit.tokens || []);
       state = unit.segments.some(done) ? 'partial' : unit.status;
-    } else return pending(unit, unit.status, inline ? 'title' : 'block');
+    } else return pending(unit, unit.sourceChanged ? 'source-changed' : unit.status, inline ? 'title' : 'block');
     return slot({ type: inline ? 'title' : 'block', unitId: unit.unitId, state, value });
   }
 
@@ -70,7 +70,7 @@ export function renderProgressiveGuide(snapshot, units, language, { idPrefix = '
     return text.replace(paragraph, (_whole, contents) => contents).replace(marker, (_whole, index) => {
       const item = slots[Number(index)]; if (!item) return '';
       if (item.type === 'pending') {
-        const label = item.state === 'error' ? 'Falha na tradução' : item.state === 'running' ? 'Traduzindo…' : item.state === 'manual' ? 'Edição aguardando confirmação' : item.kind === 'title' ? 'Título aguardando tradução' : 'Aguardando tradução';
+        const label = item.state === 'source-changed' ? 'Não traduzido — original alterado' : item.state === 'error' ? 'Falha na tradução' : item.state === 'running' ? 'Traduzindo…' : item.state === 'manual' ? 'Edição aguardando confirmação' : item.kind === 'title' ? 'Título aguardando tradução' : 'Aguardando tradução';
         return `<span class="translation-document-placeholder" lang="pt-BR" dir="ltr" data-state="${esc(item.state)}" data-kind="${item.kind}"><button type="button" data-review-unit="${esc(item.unitId)}" aria-label="Revisar ${item.index ? `parte ${item.index}` : 'trecho'}: ${esc(label)}">${item.index ? `Parte ${item.index} · ` : ''}${label}</button></span>`;
       }
       const action = `<button type="button" class="translation-document-edit" data-review-unit="${esc(item.unitId)}" aria-label="Revisar este trecho" title="Revisar este trecho">✎</button>`;

@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 jobs:
@@ -19,16 +20,16 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run dist:linux
-      - run: test -s release/SideMaster-1.0.0-x86_64.AppImage
+      - run: test -s release/SideMaster-1.0.1-x86_64.AppImage
       - uses: actions/upload-artifact@v4
         with:
           name: sidemaster-linux-x64
-          path: release/SideMaster-1.0.0-x86_64.AppImage
+          path: release/SideMaster-1.0.1-x86_64.AppImage
       - shell: bash
         run: |
-          chmod +x release/SideMaster-1.0.0-x86_64.AppImage
+          chmod +x release/SideMaster-1.0.1-x86_64.AppImage
           mkdir -p "$RUNNER_TEMP/sidemaster-appimage"
-          (cd "$RUNNER_TEMP/sidemaster-appimage" && "$GITHUB_WORKSPACE/release/SideMaster-1.0.0-x86_64.AppImage" --appimage-extract >/dev/null)
+          (cd "$RUNNER_TEMP/sidemaster-appimage" && "$GITHUB_WORKSPACE/release/SideMaster-1.0.1-x86_64.AppImage" --appimage-extract >/dev/null)
           export XDG_CONFIG_HOME="$RUNNER_TEMP/sidemaster-profile"
           export SIDEMASTER_PROFILE_DIR="$XDG_CONFIG_HOME/SideMaster"
           export SIDEMASTER_APP_EXE="$RUNNER_TEMP/sidemaster-appimage/squashfs-root/AppRun"
@@ -62,6 +63,9 @@ jobs:
       - run: npm run dist:win
       - shell: pwsh
         run: |
+          npm version 1.0.0 --no-git-tag-version --ignore-scripts
+          npm ci
+          npm run dist:win
           $installer = Get-ChildItem release/SideMaster-1.0.0-Setup.exe
           if (-not $installer -or $installer.Length -eq 0) { throw 'NSIS installer missing' }
           $portable = Get-ChildItem release/SideMaster-1.0.0-Portable.exe
@@ -94,4 +98,25 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: sidemaster-windows-x64
-          path: release/*.exe
+          path: release/SideMaster-1.0.1-Portable.exe
+
+  publish-release:
+    if: github.ref == 'refs/tags/v1.0.1'
+    needs: [linux-appimage, windows-packages]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          pattern: sidemaster-*
+          merge-multiple: true
+      - name: Check release assets
+        run: |
+          test -s release-assets/SideMaster-1.0.1-x86_64.AppImage
+          test -s release-assets/SideMaster-1.0.1-Portable.exe
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --repo "$GITHUB_REPOSITORY" --title "SideMaster ${GITHUB_REF_NAME#v}" --generate-notes
