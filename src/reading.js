@@ -2,7 +2,7 @@ import { containingMatchup, effectivePlan, PLAN_FIELDS } from './model.js?v=hier
 import { parseList } from './deck.js?v=hand-images-fix';
 import { renderMarkdown, escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
 import { findCard, cachedCard, getImageBlob } from './cards.js';
-import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=visual-deck-pdf-cache-v2';
+import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=pdf-size-dedup-v1';
 
 export const READING_STYLES = DECK_VISUAL_STYLES + `
 body{font:16px system-ui,sans-serif;color:#20202a;line-height:1.55;margin:0}
@@ -138,40 +138,59 @@ export async function hydrateCards(root) {
 export async function exportedHtml(guide, patreon = false, { embedCachedImages = false } = {}) {
   const root = document.createElement('div'); root.innerHTML = renderGuide(guide);
   await hydrateCards(root);
+  const embeddedAssets = new Map(), embeddedRules = [];
+  const transparentPixel = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
   for (const img of root.querySelectorAll('img')) {
-    if (embedCachedImages && !img.src.startsWith('data:')) {
-      const candidates = [...new Set([img.dataset.remoteSrc, img.src].filter(Boolean))];
-      let blob = null;
-      let lastError;
-      for (const source of candidates) {
-        try {
-          const protocol = new URL(source, document.baseURI).protocol;
-          if (!['https:', 'http:', 'blob:'].includes(protocol)) throw new Error('Protocolo de imagem não permitido para exportação.');
-          blob = await getImageBlob(source);
-          if (!blob) {
-            const response = await fetch(source, { signal: AbortSignal.timeout(15000) });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            blob = await response.blob();
-          }
-          const extension = new URL(source, document.baseURI).pathname.split('.').pop().toLowerCase();
-          const extensionTypes = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif', svg: 'image/svg+xml' };
-          const mimeType = blob.type.startsWith('image/') ? blob.type : extensionTypes[extension] || (blob.type ? '' : 'image/jpeg');
-          if (!mimeType) throw new Error('O recurso recebido não é uma imagem.');
-          if (blob.type !== mimeType) blob = new Blob([blob], { type: mimeType });
-          break;
-        } catch (error) { blob = null; lastError = error; }
+    if (embedCachedImages) {
+      const originalSource = img.dataset.remoteSrc || img.src;
+      let asset = embeddedAssets.get(originalSource);
+      if (!asset) {
+        const candidates = [...new Set([img.dataset.remoteSrc, img.src].filter(Boolean))];
+        let blob = null;
+        let lastError;
+        for (const source of candidates) {
+          try {
+            const protocol = new URL(source, document.baseURI).protocol;
+            if (!['https:', 'http:', 'blob:', 'data:'].includes(protocol)) throw new Error('Protocolo de imagem não permitido para exportação.');
+            blob = source.startsWith('data:') ? await fetch(source).then(response => response.blob()) : await getImageBlob(source);
+            if (!blob) {
+              const response = await fetch(source, { signal: AbortSignal.timeout(15000) });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              blob = await response.blob();
+            }
+            const extension = new URL(source, document.baseURI).pathname.split('.').pop().toLowerCase();
+            const extensionTypes = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif', svg: 'image/svg+xml' };
+            const mimeType = blob.type.startsWith('image/') ? blob.type : extensionTypes[extension] || (blob.type ? '' : 'image/jpeg');
+            if (!mimeType) throw new Error('O recurso recebido não é uma imagem.');
+            if (blob.type !== mimeType) blob = new Blob([blob], { type: mimeType });
+            break;
+          } catch (error) { blob = null; lastError = error; }
+        }
+        if (!blob && (img.classList.contains('deck-cover') || img.getAttribute('aria-hidden') === 'true')) {
+          img.remove();
+          continue;
+        }
+        if (!blob) throw new Error(`Não foi possível incorporar a imagem “${img.alt || 'sem descrição'}” ao PDF${lastError ? `: ${lastError.message}` : '.'}`);
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(reader.error || new Error('Falha ao converter imagem.')); reader.readAsDataURL(blob);
+        });
+        let dimensions;
+        try { const bitmap = await createImageBitmap(blob); dimensions = [bitmap.width, bitmap.height]; bitmap.close(); } catch {}
+        const assetClass = `pdf-image-asset-${embeddedAssets.size}`;
+        asset = { dataUrl, assetClass, dimensions };
+        embeddedAssets.set(originalSource, asset);
+        embeddedRules.push(`.${assetClass}{background-image:url("${dataUrl}");background-position:center;background-repeat:no-repeat;background-size:100% 100%}`);
       }
-      if (!blob && (img.classList.contains('deck-cover') || img.getAttribute('aria-hidden') === 'true')) {
-        img.remove();
-        continue;
-      }
-      if (!blob) throw new Error(`Não foi possível incorporar a imagem “${img.alt || 'sem descrição'}” ao PDF${lastError ? `: ${lastError.message}` : '.'}`);
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(reader.error || new Error('Falha ao converter imagem.')); reader.readAsDataURL(blob);
-      });
-      img.src = dataUrl;
+      if (asset.dimensions?.[0] > 0 && asset.dimensions?.[1] > 0) { img.width = asset.dimensions[0]; img.height = asset.dimensions[1]; }
+      img.classList.add('pdf-embedded-image', asset.assetClass);
+      img.src = transparentPixel;
       delete img.dataset.remoteSrc;
     } else if (!embedCachedImages && img.dataset.remoteSrc) img.src = img.dataset.remoteSrc;
+  }
+  if (embeddedRules.length) {
+    const style = document.createElement('style');
+    style.textContent = `.pdf-embedded-image{background-origin:content-box}${embeddedRules.join('')}`;
+    root.prepend(style);
   }
   root.querySelectorAll('.card-ref').forEach(ref => {
     const a = document.createElement('a'); a.textContent = ref.textContent;

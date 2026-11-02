@@ -17,6 +17,7 @@ app.setPath('userData', APP_DATA);
 app.setPath('sessionData', path.join(APP_DATA, 'session'));
 
 const MAX_FILE_BYTES = 12 * 1024 * 1024;
+const MAX_PDF_HTML_BYTES = MAX_FILE_BYTES * 8;
 const cleanName = value => String(value || 'guia').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').trim().slice(0, 100) || 'guia';
 let mainWindow;
 let closeInProgress = false;
@@ -240,7 +241,8 @@ async function registerIpc() {
   });
   ipcMain.handle('files:export-pdf', async (event, guide, html) => {
     requireSender(event);
-    if (!guide || !validId(guide.guideId) || typeof html !== 'string' || Buffer.byteLength(html) > MAX_FILE_BYTES * 4) throw new Error('Pedido de PDF inválido');
+    if (!guide || !validId(guide.guideId) || typeof html !== 'string') throw new Error('Pedido de PDF inválido');
+    if (Buffer.byteLength(html) > MAX_PDF_HTML_BYTES) throw new Error('O guia é grande demais para gerar o PDF (limite de 96 MiB de conteúdo). Reduza imagens ou seções e tente novamente.');
     const chosen = await saveDialog({ title: 'Salvar guia em PDF', defaultPath: `${cleanName(guide.title)}.pdf`, filters: [{ name: 'PDF', extensions: ['pdf'] }] });
     if (chosen.canceled) return { canceled: true };
     const token = crypto.randomUUID(); pendingHtml.set(token, html);
@@ -250,7 +252,7 @@ async function registerIpc() {
       printWindow.webContents.on('will-navigate', e => e.preventDefault());
       await printWindow.loadURL(`${APP_ORIGIN}/print/${token}`);
       await Promise.race([
-        printWindow.webContents.executeJavaScript("Promise.all([document.fonts?.ready, ...[...document.images].map(img => img.decode())])"),
+        printWindow.webContents.executeJavaScript("Promise.all([document.fonts?.ready, ...[...document.images].map(img => img.decode()), ...[...new Set([...document.querySelectorAll('.pdf-embedded-image')].map(el => getComputedStyle(el).backgroundImage).filter(value => value.startsWith('url(')).map(value => value.slice(5, -2)))].map(src => { const image = new Image(); image.src = src; return image.decode(); })])"),
         new Promise((_, reject) => setTimeout(() => reject(new Error('As imagens do PDF demoraram demais para serem preparadas.')), 30000)),
       ]);
       const pdf = await printWindow.webContents.printToPDF({ pageSize: 'A4', printBackground: true, preferCSSPageSize: true, margins: { top: 0.63, bottom: 0.63, left: 0.63, right: 0.63 } });
