@@ -2,7 +2,7 @@ import { containingMatchup, effectivePlan, PLAN_FIELDS } from './model.js?v=hier
 import { parseList } from './deck.js?v=hand-images-fix';
 import { renderMarkdown, escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
 import { findCard, cachedCard, getImageBlob } from './cards.js';
-import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=pdf-size-dedup-v1';
+import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=pdf-layout-v1';
 
 export const READING_STYLES = DECK_VISUAL_STYLES + `
 body{font:16px system-ui,sans-serif;color:#20202a;line-height:1.55;margin:0}
@@ -23,7 +23,7 @@ body{font:16px system-ui,sans-serif;color:#20202a;line-height:1.55;margin:0}
 .sideboard-transfers{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin:1.2rem 0 1.4rem}.sideboard-transfer{padding:16px 17px;border:1px solid;border-top-width:3px;border-radius:10px;min-width:0;break-inside:avoid}.sideboard-transfer--in{background:#f0f8f3;border-color:#cfe5d6;border-top-color:#5c9c74;color:#346b48}.sideboard-transfer--out{background:#fff3f0;border-color:#efd7d1;border-top-color:#c87565;color:#984d40}.transfer-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.transfer-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:7px}.transfer-title>:is(h2,h3,h4,h5,h6){font-size:15px;margin:0!important;font-weight:650;color:inherit}.transfer-count{font-size:10px;opacity:.75;white-space:nowrap}.transfer-arrow{font-size:23px;line-height:1;display:grid;place-items:center;width:31px;height:31px;border-radius:8px;background:#ffffff80;border:1px solid #00000009;flex-shrink:0}.transfer-content{font-size:13px;line-height:1.8;overflow-wrap:anywhere}.transfer-content>:first-child{margin-top:0}.transfer-content>:last-child{margin-bottom:0}.sideboard-transfer--in .card-ref{color:#31734b}.sideboard-transfer--out .card-ref{color:#a44c3e}.transfer-empty{font-size:12px;opacity:.7;margin:0}.plan-text{margin:1.1rem 0}.plan-text>:is(h2,h3,h4,h5,h6){font-size:13px;margin:0 0 .5rem;color:#76617f}.plan-text p{margin:.4rem 0;font-size:14px;line-height:1.7}
 .matchup-heading{justify-content:flex-start;column-gap:12px}
 @media(max-width:420px){.sideboard-transfers{gap:8px}.sideboard-transfer{padding:11px 10px}.transfer-heading{gap:4px}.transfer-title>:is(h2,h3,h4,h5,h6){font-size:13px}.transfer-arrow{width:25px;height:25px;font-size:20px}.transfer-content{font-size:11px}.transfer-count{font-size:9px}.matchup-rating{font-size:10px}.matchup-heading{align-items:flex-start}}
-@media print{@page{size:A4;margin:16mm}.guide-document{padding:0;max-width:none}.card-strip{break-inside:avoid}.card-slot img,.card-slot:hover img{transform:none}.guide-section{break-inside:auto}h1,h2,h3,h4,h5,h6{break-after:avoid}.deck-entry{width:90px}}
+@media print{@page{size:A4;margin:16mm}.guide-document{padding:0;max-width:none}.card-strip{break-inside:avoid}.card-slot img,.card-slot:hover img{transform:none}.guide-section{break-inside:auto}h1,h2,h3,h4,h5,h6{break-after:avoid-page}.guide-section>h2:has(+.deck-visual){break-after:avoid-page}.guide-section>h2:has(+.deck-visual)+.deck-visual{break-before:avoid-page}.deck-entry{width:90px}}
 `;
 
 const heading = (text, depth) => `<h${Math.min(depth, 6)}>${esc(text)}</h${Math.min(depth, 6)}>`;
@@ -181,7 +181,10 @@ export async function exportedHtml(guide, patreon = false, { embedCachedImages =
         embeddedAssets.set(originalSource, asset);
         embeddedRules.push(`.${assetClass}{background-image:url("${dataUrl}");background-position:center;background-repeat:no-repeat;background-size:100% 100%}`);
       }
-      if (asset.dimensions?.[0] > 0 && asset.dimensions?.[1] > 0) { img.width = asset.dimensions[0]; img.height = asset.dimensions[1]; }
+      if (asset.dimensions?.[0] > 0 && asset.dimensions?.[1] > 0) {
+        img.width = asset.dimensions[0]; img.height = asset.dimensions[1];
+        img.style.aspectRatio = `${asset.dimensions[0]} / ${asset.dimensions[1]}`;
+      }
       img.classList.add('pdf-embedded-image', asset.assetClass);
       img.src = transparentPixel;
       delete img.dataset.remoteSrc;
