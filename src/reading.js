@@ -2,7 +2,7 @@ import { containingMatchup, effectivePlan, PLAN_FIELDS } from './model.js?v=hier
 import { parseList } from './deck.js?v=hand-images-fix';
 import { renderMarkdown, escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
 import { findCard, cachedCard, getImageBlob } from './cards.js';
-import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=visual-deck';
+import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=visual-deck-pdf-cache-v2';
 
 export const READING_STYLES = DECK_VISUAL_STYLES + `
 body{font:16px system-ui,sans-serif;color:#20202a;line-height:1.55;margin:0}
@@ -153,9 +153,17 @@ export async function exportedHtml(guide, patreon = false, { embedCachedImages =
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             blob = await response.blob();
           }
-          if (!blob.type.startsWith('image/')) throw new Error('O recurso recebido não é uma imagem.');
+          const extension = new URL(source, document.baseURI).pathname.split('.').pop().toLowerCase();
+          const extensionTypes = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif', svg: 'image/svg+xml' };
+          const mimeType = blob.type.startsWith('image/') ? blob.type : extensionTypes[extension] || (blob.type ? '' : 'image/jpeg');
+          if (!mimeType) throw new Error('O recurso recebido não é uma imagem.');
+          if (blob.type !== mimeType) blob = new Blob([blob], { type: mimeType });
           break;
         } catch (error) { blob = null; lastError = error; }
+      }
+      if (!blob && (img.classList.contains('deck-cover') || img.getAttribute('aria-hidden') === 'true')) {
+        img.remove();
+        continue;
       }
       if (!blob) throw new Error(`Não foi possível incorporar a imagem “${img.alt || 'sem descrição'}” ao PDF${lastError ? `: ${lastError.message}` : '.'}`);
       const dataUrl = await new Promise((resolve, reject) => {
