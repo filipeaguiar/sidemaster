@@ -1,7 +1,7 @@
 import { containingMatchup, effectivePlan, PLAN_FIELDS } from './model.js?v=hierarchy-v3';
 import { parseList } from './deck.js?v=hand-images-fix';
 import { renderMarkdown, escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
-import { findCard, cachedCard } from './cards.js';
+import { findCard, cachedCard, getImageBlob } from './cards.js';
 import { renderDeckBoard, renderDeckContents, DECK_VISUAL_STYLES } from './deck-visual.js?v=visual-deck';
 
 export const READING_STYLES = DECK_VISUAL_STYLES + `
@@ -139,12 +139,30 @@ export async function exportedHtml(guide, patreon = false, { embedCachedImages =
   const root = document.createElement('div'); root.innerHTML = renderGuide(guide);
   await hydrateCards(root);
   for (const img of root.querySelectorAll('img')) {
-    if (embedCachedImages && img.src.startsWith('blob:')) {
-      try {
-        const blob = await fetch(img.src).then(response => response.blob());
-        const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
-        img.src = dataUrl;
-      } catch { img.replaceWith(Object.assign(document.createElement('span'), { className: 'card-image-error', textContent: img.alt || 'Imagem indisponível' })); }
+    if (embedCachedImages && !img.src.startsWith('data:')) {
+      const candidates = [...new Set([img.dataset.remoteSrc, img.src].filter(Boolean))];
+      let blob = null;
+      let lastError;
+      for (const source of candidates) {
+        try {
+          const protocol = new URL(source, document.baseURI).protocol;
+          if (!['https:', 'http:', 'blob:'].includes(protocol)) throw new Error('Protocolo de imagem não permitido para exportação.');
+          blob = await getImageBlob(source);
+          if (!blob) {
+            const response = await fetch(source, { signal: AbortSignal.timeout(15000) });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            blob = await response.blob();
+          }
+          if (!blob.type.startsWith('image/')) throw new Error('O recurso recebido não é uma imagem.');
+          break;
+        } catch (error) { blob = null; lastError = error; }
+      }
+      if (!blob) throw new Error(`Não foi possível incorporar a imagem “${img.alt || 'sem descrição'}” ao PDF${lastError ? `: ${lastError.message}` : '.'}`);
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(reader.error || new Error('Falha ao converter imagem.')); reader.readAsDataURL(blob);
+      });
+      img.src = dataUrl;
+      delete img.dataset.remoteSrc;
     } else if (!embedCachedImages && img.dataset.remoteSrc) img.src = img.dataset.remoteSrc;
   }
   root.querySelectorAll('.card-ref').forEach(ref => {

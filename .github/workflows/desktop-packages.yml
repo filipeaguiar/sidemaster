@@ -20,16 +20,16 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run dist:linux
-      - run: test -s release/SideMaster-1.0.1-x86_64.AppImage
+      - run: test -s release/SideMaster-1.0.2-x86_64.AppImage
       - uses: actions/upload-artifact@v4
         with:
           name: sidemaster-linux-x64
-          path: release/SideMaster-1.0.1-x86_64.AppImage
+          path: release/SideMaster-1.0.2-x86_64.AppImage
       - shell: bash
         run: |
-          chmod +x release/SideMaster-1.0.1-x86_64.AppImage
+          chmod +x release/SideMaster-1.0.2-x86_64.AppImage
           mkdir -p "$RUNNER_TEMP/sidemaster-appimage"
-          (cd "$RUNNER_TEMP/sidemaster-appimage" && "$GITHUB_WORKSPACE/release/SideMaster-1.0.1-x86_64.AppImage" --appimage-extract >/dev/null)
+          (cd "$RUNNER_TEMP/sidemaster-appimage" && "$GITHUB_WORKSPACE/release/SideMaster-1.0.2-x86_64.AppImage" --appimage-extract >/dev/null)
           export XDG_CONFIG_HOME="$RUNNER_TEMP/sidemaster-profile"
           export SIDEMASTER_PROFILE_DIR="$XDG_CONFIG_HOME/SideMaster"
           export SIDEMASTER_APP_EXE="$RUNNER_TEMP/sidemaster-appimage/squashfs-root/AppRun"
@@ -78,11 +78,11 @@ jobs:
           node scripts/electron-smoke.mjs edit-close
           if ($LASTEXITCODE -ne 0) { throw 'Baseline smoke test failed' }
           if (-not $process.WaitForExit(30000)) { throw 'Baseline app did not exit' }
-          npm version 1.0.1 --no-git-tag-version --ignore-scripts
+          npm version 1.0.2 --no-git-tag-version --ignore-scripts
           if ($LASTEXITCODE -ne 0) { throw 'Could not prepare release version' }
           npm run dist:win
           if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
-          $upgrade = Get-ChildItem release/SideMaster-1.0.1-Setup.exe
+          $upgrade = Get-ChildItem release/SideMaster-1.0.2-Setup.exe
           if (-not $upgrade -or $upgrade.Length -eq 0) { throw 'Updated NSIS installer missing' }
           Start-Process -FilePath $upgrade.FullName -ArgumentList @('/S', "/D=$installDir") -Wait
           $updatedApp = Join-Path $installDir 'SideMaster.exe'
@@ -90,7 +90,7 @@ jobs:
           node scripts/electron-smoke.mjs verify-update
           if ($LASTEXITCODE -ne 0) { throw 'Installed update smoke test failed' }
           if (-not $updated.WaitForExit(30000)) { throw 'Updated app did not exit' }
-          $portableApp = Join-Path $env:GITHUB_WORKSPACE 'release/SideMaster-1.0.1-Portable.exe'
+          $portableApp = Join-Path $env:GITHUB_WORKSPACE 'release/SideMaster-1.0.2-Portable.exe'
           if (-not (Test-Path $portableApp)) { throw 'Updated portable executable missing' }
           $env:SIDEMASTER_APP_EXE = $portableApp
           $portableProcess = Start-Process -FilePath $portableApp -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
@@ -100,10 +100,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: sidemaster-windows-x64
-          path: release/SideMaster-1.0.1-Portable.exe
+          path: release/SideMaster-1.0.2-Portable.exe
 
   publish-release:
-    if: github.ref == 'refs/tags/v1.0.1'
+    if: github.ref == 'refs/tags/v1.0.2'
     needs: [linux-appimage, windows-packages]
     runs-on: ubuntu-24.04
     permissions:
@@ -116,8 +116,8 @@ jobs:
           merge-multiple: true
       - name: Check release assets
         run: |
-          test -s release-assets/SideMaster-1.0.1-x86_64.AppImage
-          test -s release-assets/SideMaster-1.0.1-Portable.exe
+          test -s release-assets/SideMaster-1.0.2-x86_64.AppImage
+          test -s release-assets/SideMaster-1.0.2-Portable.exe
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

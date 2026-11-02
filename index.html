@@ -73,7 +73,7 @@
               <label>De<select id="translation-source"><option value="pt-BR">Português (Brasil)</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option></select></label>
               <label>Para<select id="translation-target"><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="pt-BR">Português (Brasil)</option><option value="custom">Outro idioma…</option></select></label>
               <label id="translation-custom-label" hidden>Código do idioma<input id="translation-custom-language" type="text" placeholder="Ex.: ja, ar, zh-Hans"></label>
-              <p id="translation-language-note" class="translation-help" hidden>Os rótulos de leitura deste idioma usarão inglês. O texto do guia será traduzido para o idioma escolhido.</p>
+              <p id="translation-language-note" class="translation-help" hidden>Alguns rótulos fixos da leitura podem aparecer em inglês. A prosa do guia será solicitada no idioma de destino mostrado na amostra.</p>
               <label>Modelo do Ollama<select id="translation-model" disabled><option value="">Conectando…</option></select></label>
               <p id="translation-model-note" class="translation-help" role="status"></p>
               <details id="translation-advanced" class="translation-advanced">
@@ -99,8 +99,12 @@
               </ol>
               <div class="translation-next"><div><h1 id="translation-next-title">Prepare sua tradução</h1><p id="translation-next-step" aria-live="polite"></p></div><div class="translation-launch-actions"><button id="translation-test" type="button" disabled>Testar trecho</button><button id="translation-cancel-test" type="button" hidden>Cancelar teste</button><button id="translation-start" type="button" class="translation-primary" disabled>Iniciar tradução</button><button id="translation-create-guide" class="translation-primary" type="button" hidden>Criar guia traduzido</button></div></div>
               <div id="translation-help" class="translation-notice" hidden role="status" tabindex="-1"></div>
+              <div id="translation-legacy-notice" class="translation-notice" hidden role="status">
+                <span id="translation-legacy-text"></span>
+                <button id="translation-legacy-continue" type="button">Continuar explicitamente com o perfil antigo</button>
+              </div>
               <section id="translation-test-panel" class="translation-sample" hidden aria-label="Resultado do teste">
-                <div class="translation-sample-heading"><strong id="translation-test-state">Teste de tradução</strong><span>Este teste não altera o guia.</span></div>
+                <div class="translation-sample-heading"><strong id="translation-test-state">Teste de tradução</strong><span id="translation-test-target">Destino solicitado — confira se a prosa está neste idioma. O teste não altera o guia.</span></div>
                 <div class="translation-pair"><div><span>Trecho original</span><p id="translation-test-original"></p></div><div><span>Resultado do modelo</span><p id="translation-test-result" aria-live="polite"></p></div></div>
               </section>
             </div>
@@ -137,6 +141,6 @@
     <dialog id="tree-dialog" class="tree-dialog"></dialog>
     <dialog id="library-dialog" class="tree-dialog library-dialog" aria-labelledby="library-title"></dialog>
     <dialog id="card-issues-dialog" class="tree-dialog card-issues-dialog" aria-labelledby="card-issues-title"></dialog>
-    <script type="module" src="src/editor.js?v=translation-workspace-v1"></script>
+    <script type="module" src="src/editor.js?v=1.0.2"></script>
   </body>
 </html>

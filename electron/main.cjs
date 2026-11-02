@@ -164,7 +164,7 @@ async function registerProtocol() {
       const token = url.pathname.slice('/print/'.length);
       const html = pendingHtml.get(token);
       if (!html) return new Response('Expired', { status: 404 });
-      return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': "default-src 'none'; img-src data: blob: https://cards.scryfall.io https://c1.scryfall.com; style-src 'unsafe-inline'; font-src data:; script-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
+      return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" } });
     }
     const relative = decodeURIComponent(url.pathname.slice(1) || 'index.html');
     const resolved = path.resolve(APP_ROOT, relative);
@@ -250,8 +250,8 @@ async function registerIpc() {
       printWindow.webContents.on('will-navigate', e => e.preventDefault());
       await printWindow.loadURL(`${APP_ORIGIN}/print/${token}`);
       await Promise.race([
-        printWindow.webContents.executeJavaScript("Promise.all([document.fonts?.ready, ...[...document.images].map(img => img.decode().catch(() => {}))])"),
-        new Promise(resolve => setTimeout(resolve, 8000)),
+        printWindow.webContents.executeJavaScript("Promise.all([document.fonts?.ready, ...[...document.images].map(img => img.decode())])"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('As imagens do PDF demoraram demais para serem preparadas.')), 30000)),
       ]);
       const pdf = await printWindow.webContents.printToPDF({ pageSize: 'A4', printBackground: true, preferCSSPageSize: true, margins: { top: 0.63, bottom: 0.63, left: 0.63, right: 0.63 } });
       await guideStore.atomicWrite(chosen.filePath, pdf);

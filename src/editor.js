@@ -2,7 +2,7 @@ import { emptyGuide, createNode, normalizeGuide, envelope, walkNodes, locateNode
 import { repository, startupProblems } from './storage.js?v=hierarchy-v3';
 import { escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
 import { validateGuide } from './validation.js?v=hand-images-fix';
-import { renderGuide, hydrateCards, exportedHtml, READING_STYLES } from './reading.js?v=hide-empty-sections-v1';
+import { renderGuide, hydrateCards, exportedHtml, READING_STYLES } from './reading.js?v=pdf-embedded-image-cache-v1';
 import { afterTyping } from './after-typing.js';
 import { parseList } from './deck.js?v=hand-images-fix';
 import { downloadMissingCardImages, collectGuideCardNames, findCard, cachedCard } from './cards.js';
@@ -446,8 +446,10 @@ $('#refresh-cards').addEventListener('click', async () => {
     const issueNames = collectCardIssues($('#preview')).map(i => i.name);
     const cardNames = [...new Set([...guideNames, ...issueNames])];
     for (const name of cardNames) {
-      const card = cachedCard(name);
-      if (!card || card.status === 'error' || card.status === 'notfound') {
+      // Consult the in-memory and persistent catalog first. Force a new API
+      // lookup only for entries that are known to be missing or unavailable.
+      const card = cachedCard(name) || await findCard(name);
+      if (card.status === 'error' || card.status === 'notfound') {
         await findCard(name, { force: true });
       }
     }
