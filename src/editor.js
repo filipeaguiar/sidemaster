@@ -2,7 +2,7 @@ import { emptyGuide, createNode, normalizeGuide, envelope, walkNodes, locateNode
 import { repository, startupProblems } from './storage.js?v=hierarchy-v3';
 import { escapeHtml as esc } from './markdown.js?v=hierarchy-v3';
 import { validateGuide } from './validation.js?v=hand-images-fix';
-import { renderGuide, hydrateCards, exportedHtml, READING_STYLES } from './reading.js?v=pdf-layout-v1';
+import { renderGuide, hydrateCards, exportedHtml, READING_STYLES } from './reading.js?v=pdf-aspect-height-v2';
 import { afterTyping } from './after-typing.js';
 import { parseList } from './deck.js?v=hand-images-fix';
 import { downloadMissingCardImages, collectGuideCardNames, findCard, cachedCard } from './cards.js';

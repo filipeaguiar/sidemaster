@@ -179,12 +179,16 @@ export async function exportedHtml(guide, patreon = false, { embedCachedImages =
         const assetClass = `pdf-image-asset-${embeddedAssets.size}`;
         asset = { dataUrl, assetClass, dimensions };
         embeddedAssets.set(originalSource, asset);
-        embeddedRules.push(`.${assetClass}{background-image:url("${dataUrl}");background-position:center;background-repeat:no-repeat;background-size:100% 100%}`);
+        embeddedRules.push(`.${assetClass}{background-image:url("${dataUrl}");background-position:center;background-repeat:no-repeat;background-size:contain}`);
       }
       if (asset.dimensions?.[0] > 0 && asset.dimensions?.[1] > 0) {
         img.width = asset.dimensions[0]; img.height = asset.dimensions[1];
         img.style.aspectRatio = `${asset.dimensions[0]} / ${asset.dimensions[1]}`;
       }
+      // The width is responsive, so the source height must not remain fixed.
+      // Covers keep their layout box and crop the background without stretching.
+      if (img.classList.contains('deck-cover')) img.style.backgroundSize = 'cover';
+      else img.style.height = 'auto';
       img.classList.add('pdf-embedded-image', asset.assetClass);
       img.src = transparentPixel;
       delete img.dataset.remoteSrc;
