@@ -60,16 +60,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: npm run dist:win
       - shell: pwsh
         run: |
           npm version 1.0.0 --no-git-tag-version --ignore-scripts
-          npm ci
-          npm run dist:win
+          if ($LASTEXITCODE -ne 0) { throw 'Could not prepare baseline version' }
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Baseline build failed' }
           $installer = Get-ChildItem release/SideMaster-1.0.0-Setup.exe
           if (-not $installer -or $installer.Length -eq 0) { throw 'NSIS installer missing' }
-          $portable = Get-ChildItem release/SideMaster-1.0.0-Portable.exe
-          if (-not $portable -or $portable.Length -eq 0) { throw 'Portable executable missing' }
           $installDir = Join-Path $env:RUNNER_TEMP 'SideMaster-install'
           Start-Process -FilePath $installer.FullName -ArgumentList @('/S', "/D=$installDir") -Wait
           $app = Join-Path $installDir 'SideMaster.exe'
@@ -78,23 +76,27 @@ jobs:
           $env:SIDEMASTER_PROFILE_DIR = Join-Path $env:APPDATA 'SideMaster'
           $process = Start-Process -FilePath $app -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
           node scripts/electron-smoke.mjs edit-close
-          Wait-Process -Id $process.Id -Timeout 30
+          if ($LASTEXITCODE -ne 0) { throw 'Baseline smoke test failed' }
+          if (-not $process.WaitForExit(30000)) { throw 'Baseline app did not exit' }
           npm version 1.0.1 --no-git-tag-version --ignore-scripts
-          npm ci
+          if ($LASTEXITCODE -ne 0) { throw 'Could not prepare release version' }
           npm run dist:win
+          if ($LASTEXITCODE -ne 0) { throw 'Release build failed' }
           $upgrade = Get-ChildItem release/SideMaster-1.0.1-Setup.exe
           if (-not $upgrade -or $upgrade.Length -eq 0) { throw 'Updated NSIS installer missing' }
           Start-Process -FilePath $upgrade.FullName -ArgumentList @('/S', "/D=$installDir") -Wait
           $updatedApp = Join-Path $installDir 'SideMaster.exe'
           $updated = Start-Process -FilePath $updatedApp -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
           node scripts/electron-smoke.mjs verify-update
-          Wait-Process -Id $updated.Id -Timeout 30
+          if ($LASTEXITCODE -ne 0) { throw 'Installed update smoke test failed' }
+          if (-not $updated.WaitForExit(30000)) { throw 'Updated app did not exit' }
           $portableApp = Join-Path $env:GITHUB_WORKSPACE 'release/SideMaster-1.0.1-Portable.exe'
           if (-not (Test-Path $portableApp)) { throw 'Updated portable executable missing' }
           $env:SIDEMASTER_APP_EXE = $portableApp
           $portableProcess = Start-Process -FilePath $portableApp -ArgumentList @('--remote-debugging-port=9222', '--inspect=9223') -PassThru
           node scripts/electron-smoke.mjs verify-update
-          Wait-Process -Id $portableProcess.Id -Timeout 30
+          if ($LASTEXITCODE -ne 0) { throw 'Portable update smoke test failed' }
+          if (-not $portableProcess.WaitForExit(30000)) { throw 'Portable app did not exit' }
       - uses: actions/upload-artifact@v4
         with:
           name: sidemaster-windows-x64
